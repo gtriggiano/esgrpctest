@@ -19,26 +19,26 @@ import WriteToMultipleAggregateStream from './WriteToMultipleAggregateStream'
 
 const PROTOCOL_FILE_PATH = `${__dirname}/../../gRPCEventStore.proto`
 
-function getGRPCServer () {
+function createGRPCServer (eventStore) {
   const gRPCEventStoreProtocol = grpc.load(PROTOCOL_FILE_PATH).gRPCEventStore
   const _grpcServer = new grpc.Server()
   _grpcServer.addProtoService(gRPCEventStoreProtocol.Api.service, {
-    ping: Ping(),
-    readAggregateStreamForwardFromCursor: ReadAggregateStreamForwardFromCursor(),
-    readAggregateTypeStreamForward: ReadAggregateTypeStreamForward(),
-    readEventTypeStreamForward: ReadEventTypeStreamForward(),
-    readStoreStreamForward: ReadStoreStreamForward(),
-    subscribeToAggregateStream: SubscribeToAggregateStream(),
-    subscribeToAggregateStreamFromCursor: SubscribeToAggregateStreamFromCursor(),
-    subscribeToAggregateTypeStream: SubscribeToAggregateTypeStream(),
-    subscribeToAggregateTypeStreamFrom: SubscribeToAggregateTypeStreamFrom(),
-    subscribeToEventTypeStream: SubscribeToEventTypeStream(),
-    subscribeToEventTypeStreamFrom: SubscribeToEventTypeStreamFrom(),
-    subscribeToStoreStream: SubscribeToStoreStream(),
-    subscribeToStoreStreamFromCursor: SubscribeToStoreStreamFromCursor(),
-    writeToAggregateStream: WriteToAggregateStream(),
-    writeToMultipleAggregateStream: WriteToMultipleAggregateStream()
+    ping: Ping(eventStore),
+    readAggregateStreamForwardFromCursor: ReadAggregateStreamForwardFromCursor(eventStore),
+    readAggregateTypeStreamForward: ReadAggregateTypeStreamForward(eventStore),
+    readEventTypeStreamForward: ReadEventTypeStreamForward(eventStore),
+    readStoreStreamForward: ReadStoreStreamForward(eventStore),
+    subscribeToAggregateStream: SubscribeToAggregateStream(eventStore),
+    subscribeToAggregateStreamFromCursor: SubscribeToAggregateStreamFromCursor(eventStore),
+    subscribeToAggregateTypeStream: SubscribeToAggregateTypeStream(eventStore),
+    subscribeToAggregateTypeStreamFrom: SubscribeToAggregateTypeStreamFrom(eventStore),
+    subscribeToEventTypeStream: SubscribeToEventTypeStream(eventStore),
+    subscribeToEventTypeStreamFrom: SubscribeToEventTypeStreamFrom(eventStore),
+    subscribeToStoreStream: SubscribeToStoreStream(eventStore),
+    subscribeToStoreStreamFromCursor: SubscribeToStoreStreamFromCursor(eventStore),
+    writeToAggregateStream: WriteToAggregateStream(eventStore),
+    writeToMultipleAggregateStream: WriteToMultipleAggregateStream(eventStore)
   })
 }
 
-export default getGRPCServer
+export default createGRPCServer
