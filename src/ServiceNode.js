@@ -1,3 +1,18 @@
-function EventStoreServiceNode () {}
+function ServiceNode (host, settings) {
+  let instance = this instanceof ServiceNode
+  if (!instance) return new ServiceNode(host, settings)
+}
 
-export default EventStoreServiceNode
+const defaultSettings = {
+
+}
+
+const validateCtorInput = (host, _settings) => {
+
+}
+
+export default ServiceNode
+export {
+  defaultSettings,
+  validateCtorInput
+}

@@ -1,8 +1,11 @@
-import ServiceNode from './ServiceNode'
+import ServiceNode, { defaultSettings, validateCtorInput } from './ServiceNode'
 
-function CreateEventStoreNode () {
-  console.log('Just started to develop...')
-  throw new Error('Bye...')
+function CreateEventStoreNode (host, _settings) {
+  _settings = _settings || {}
+  let settings = Object.assign({}, defaultSettings, _settings)
+
+  validateCtorInput(host, settings)
+  return ServiceNode(host, settings)
 }
 
 export default CreateEventStoreNode

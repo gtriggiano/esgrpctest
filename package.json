@@ -15,7 +15,12 @@
     "i:unit:tests:live": "SERVICEHOST=eventstore mocha --compilers js:babel-register -b -w tests/unit.js",
     "i:transpile": "babel src -d lib"
   },
-  "dependencies": {},
+  "dependencies": {
+    "debug": "^2.2.0",
+    "dnsmq-messagebus": "0.0.2",
+    "grpc": "^1.0.0",
+    "rxjs": "^5.0.0-beta.12"
+  },
   "devDependencies": {
     "babel-cli": "^6.14.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
