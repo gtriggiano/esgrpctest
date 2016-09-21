@@ -1,0 +1,11 @@
+# Babel
+.babelrc
+
+# Source folder
+src/
+
+# Tests folder
+tests/
+
+# Docker Compose
+docker-compose.yml
