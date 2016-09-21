@@ -1,0 +1,43 @@
+{
+  "name": "grpc-event-store",
+  "version": "0.0.0",
+  "description": "An Event Store with a gRPC interface",
+  "main": "lib/index.js",
+  "scripts": {
+    "unit:tests:live": "npm run clean && docker-compose run development npm run i:unit:tests:live",
+    "prepublish": "npm test && ./internals/buildPackage.sh",
+    "test": "./internals/runTestSuite.sh",
+    "release": "./internals/release.sh",
+    "stop": "docker-compose stop",
+    "rm": "docker-compose rm -f",
+    "clean": "npm run stop && npm run rm",
+    "i:unit:tests": "SERVICEHOST=eventstore mocha --compilers js:babel-register tests/unit.js",
+    "i:unit:tests:live": "SERVICEHOST=eventstore mocha --compilers js:babel-register -b -w tests/unit.js",
+    "i:transpile": "babel src -d lib"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-preset-es2015": "^6.14.0",
+    "mocha": "^3.0.2",
+    "should": "^11.1.0",
+    "sinon": "^1.17.6"
+  },
+  "keywords": [
+    "gRPC",
+    "event sourcing"
+  ],
+  "standard": {
+    "globals": [
+      "describe",
+      "it"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gtriggiano/grpc-event-store.git"
+  },
+  "author": "Giacomo Triggiano <giacomotriggiano@gmail.com>",
+  "license": "MIT"
+}

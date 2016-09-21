@@ -1,0 +1,14 @@
+version: '2'
+services:
+
+  development:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./lib:/package/lib
+      - ./src:/package/src
+      - ./tests:/package/tests
+      - ./.babelrc:/package/.babelrc
+      - ./gRPCEventStore.proto:/package/gRPCEventStore.proto
+      - ./package.json:/package/package.json

@@ -1,5 +1,5 @@
-# Babel
-.babelrc
+# Internals folder
+internals/
 
 # Source folder
 src/
@@ -7,5 +7,9 @@ src/
 # Tests folder
 tests/
 
-# Docker Compose
+# Babel
+.babelrc
+
+# Docker
 docker-compose.yml
+Dockerfile.dev

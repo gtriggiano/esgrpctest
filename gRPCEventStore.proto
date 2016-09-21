@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package gRPCEventStore;
+
+service Api {
+  // Ping
+  rpc Ping (EmptyDTO) returns (EmptyDTO);
+
+}
+
+message EmptyDTO {}
