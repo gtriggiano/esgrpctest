@@ -3,15 +3,15 @@ import grpc from 'grpc'
 // Import service methods
 import Ping from './Ping'
 import ReadAggregateStreamForwardFromCursor from './ReadAggregateStreamForwardFromCursor'
-import ReadAggregateTypeStreamForward from './ReadAggregateTypeStreamForward'
-import ReadEventTypeStreamForward from './ReadEventTypeStreamForward'
-import ReadStoreStreamForward from './ReadStoreStreamForward'
+import ReadAggregateTypeStreamForwardFromCursor from './ReadAggregateTypeStreamForwardFromCursor'
+import ReadEventTypeStreamForwardFromCursor from './ReadEventTypeStreamForwardFromCursor'
+import ReadStoreStreamForwardFromCursor from './ReadStoreStreamForwardFromCursor'
 import SubscribeToAggregateStream from './SubscribeToAggregateStream'
 import SubscribeToAggregateStreamFromCursor from './SubscribeToAggregateStreamFromCursor'
 import SubscribeToAggregateTypeStream from './SubscribeToAggregateTypeStream'
-import SubscribeToAggregateTypeStreamFrom from './SubscribeToAggregateTypeStreamFrom'
+import SubscribeToAggregateTypeStreamFromCursor from './SubscribeToAggregateTypeStreamFromCursor'
 import SubscribeToEventTypeStream from './SubscribeToEventTypeStream'
-import SubscribeToEventTypeStreamFrom from './SubscribeToEventTypeStreamFrom'
+import SubscribeToEventTypeStreamFromCursor from './SubscribeToEventTypeStreamFromCursor'
 import SubscribeToStoreStream from './SubscribeToStoreStream'
 import SubscribeToStoreStreamFromCursor from './SubscribeToStoreStreamFromCursor'
 import WriteToAggregateStream from './WriteToAggregateStream'
@@ -25,15 +25,15 @@ function createGRPCServer (eventStore) {
   _grpcServer.addProtoService(gRPCEventStoreProtocol.Api.service, {
     ping: Ping(eventStore),
     readAggregateStreamForwardFromCursor: ReadAggregateStreamForwardFromCursor(eventStore),
-    readAggregateTypeStreamForward: ReadAggregateTypeStreamForward(eventStore),
-    readEventTypeStreamForward: ReadEventTypeStreamForward(eventStore),
-    readStoreStreamForward: ReadStoreStreamForward(eventStore),
+    readAggregateTypeStreamForwardFromCursor: ReadAggregateTypeStreamForwardFromCursor(eventStore),
+    readEventTypeStreamForwardFromCursor: ReadEventTypeStreamForwardFromCursor(eventStore),
+    readStoreStreamForwardFromCursor: ReadStoreStreamForwardFromCursor(eventStore),
     subscribeToAggregateStream: SubscribeToAggregateStream(eventStore),
     subscribeToAggregateStreamFromCursor: SubscribeToAggregateStreamFromCursor(eventStore),
     subscribeToAggregateTypeStream: SubscribeToAggregateTypeStream(eventStore),
-    subscribeToAggregateTypeStreamFrom: SubscribeToAggregateTypeStreamFrom(eventStore),
+    subscribeToAggregateTypeStreamFromCursor: SubscribeToAggregateTypeStreamFromCursor(eventStore),
     subscribeToEventTypeStream: SubscribeToEventTypeStream(eventStore),
-    subscribeToEventTypeStreamFrom: SubscribeToEventTypeStreamFrom(eventStore),
+    subscribeToEventTypeStreamFromCursor: SubscribeToEventTypeStreamFromCursor(eventStore),
     subscribeToStoreStream: SubscribeToStoreStream(eventStore),
     subscribeToStoreStreamFromCursor: SubscribeToStoreStreamFromCursor(eventStore),
     writeToAggregateStream: WriteToAggregateStream(eventStore),

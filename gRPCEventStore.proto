@@ -12,28 +12,28 @@ service Api {
   // The server implementation should transparently switch to live events as long as it has finished to send the old ones.
   rpc SubscribeToStoreStreamFromCursor (StoredEventCursor) returns (stream StoredEvent);
   // Returns an ending stream of all the events stored after a certain cursor
-  rpc ReadStoreStreamForward (StoredEventCursor) returns (stream StoredEvent);
+  rpc ReadStoreStreamForwardFromCursor (StoredEventCursor) returns (stream StoredEvent);
 
   // Returns a live stream of events belonging to an aggregate stream
   rpc SubscribeToAggregateStream (AggregateStreamRequest) returns (stream StoredEvent);
   // Returns a live stream of events belonging to an aggregate stream and stored after a given cursor.
-  rpc SubscribeToAggregateStreamFromCursor (AggregateIdentityAndCursor) returns (stream StoredEvent);
+  rpc SubscribeToAggregateStreamFromCursor (AggregateStreamRequest) returns (stream StoredEvent);
   // Returns an ending stream of all the events belonging to an aggregate and stored after a certain cursor
-  rpc ReadAggregateStreamForwardFromCursor (AggregateIdentityAndCursor) returns (stream StoredEvent);
+  rpc ReadAggregateStreamForwardFromCursor (AggregateStreamRequest) returns (stream StoredEvent);
 
   // Returns a live stream of events belonging to the streams of aggregates of a given type
-  rpc SubscribeToAggregateTypeStream (AggregateTypeAndCursor) returns (stream StoredEvent);
+  rpc SubscribeToAggregateTypeStream (AggregateTypeStreamRequest) returns (stream StoredEvent);
   // Returns a live stream of events belonging to the streams of aggregates of a given type and stored after a given cursor
-  rpc SubscribeToAggregateTypeStreamFrom (AggregateTypeAndCursor) returns (stream StoredEvent);
+  rpc SubscribeToAggregateTypeStreamFromCursor (AggregateTypeStreamRequest) returns (stream StoredEvent);
   // Returns an ending stream of all the events belonging to the streams of aggregates of a given type and stored after a given cursor
-  rpc ReadAggregateTypeStreamForward (AggregateTypeAndCursor) returns (stream StoredEvent);
+  rpc ReadAggregateTypeStreamForwardFromCursor (AggregateTypeStreamRequest) returns (stream StoredEvent);
 
   // Returns a live stream of events of a certain type
-  rpc SubscribeToEventTypeStream (EventTypeAndCursor) returns (stream StoredEvent);
+  rpc SubscribeToEventTypeStream (EventTypeStreamRequest) returns (stream StoredEvent);
   // Returns a live stream of events of a certain type, stored after a given cursor
-  rpc SubscribeToEventTypeStreamFrom (EventTypeAndCursor) returns (stream StoredEvent);
+  rpc SubscribeToEventTypeStreamFromCursor (EventTypeStreamRequest) returns (stream StoredEvent);
   // Returns an ending stream of all the events of a certain type stored after a given cursor
-  rpc ReadEventTypeStreamForward (EventTypeAndCursor) returns (stream StoredEvent);
+  rpc ReadEventTypeStreamForwardFromCursor (EventTypeStreamRequest) returns (stream StoredEvent);
 
   // Attempts to write a list of events into an aggregate stream
   rpc WriteToAggregateStream (WriteToAggregateStreamRequest) returns (EmptyDTO);
