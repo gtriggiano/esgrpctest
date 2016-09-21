@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "unit:tests:live": "npm run clean && docker-compose run development npm run i:unit:tests:live",
-    "prepublish": "npm test && ./internals/buildPackage.sh",
+    "prepublish": "./internals/prepublish.sh",
     "test": "./internals/runTestSuite.sh",
     "release": "./internals/release.sh",
     "stop": "docker-compose stop",
