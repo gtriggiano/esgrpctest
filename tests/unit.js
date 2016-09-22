@@ -9,8 +9,8 @@ describe('gRPC Event Store Package', function () {
   it(`let EventStore = require('grpc-event-store'); typeof EventStore === 'function'`, () => {
     should(EventStore).be.a.Function()
   })
-  it(`let eventStoreNode = EventStore(); eventStoreNode instanceof ServiceNode === true`, () => {
-    let eventStoreNode = EventStore()
+  it(`let eventStoreNode = EventStore(host [, settings]); eventStoreNode instanceof ServiceNode === true`, () => {
+    let eventStoreNode = EventStore('development')
     should(eventStoreNode).be.an.instanceof(ServiceNode)
   })
 })
