@@ -1,104 +1,84 @@
-import grpc from 'grpc'
-import util from 'util'
-import { isString, isObject, isFunction, merge } from 'lodash'
+import { isInteger, merge } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
-import backendsIfaces from './backends'
-import createGRPCServer from './gRPCImplementation/createServer'
-import StoreClusterIface, {
-  defaultSettings as defaultClusterSettings,
-  validateCtorInput as validateStoreClusterInput
-} from './StoreClusterIface'
-import { prefix } from './utils'
+import BackendInterface from './BackendInterface'
+import GRPCInterface from './GRPCInterface'
+import StoreInterface from './StoreInterface'
+import { prefixString, timeoutCallback } from './utils'
 
-function ServiceNode (host, settings) {
-  let instance = this instanceof ServiceNode
-  if (!instance) return new ServiceNode(host, settings)
+function ServiceNode (_settings) {
+  let settings = merge({}, defaultSettings, _settings)
+  _validateSettings(settings)
 
-  // Emitter inheritance
-  EventEmitter.call(this)
-
-  let serviceNode = this
+  let node = new EventEmitter()
 
   let {
-    rpcPort,
-    rpcCredentials,
+    host,
+    port,
+    credentials,
+    backendSetupTimeout,
     backend,
     cluster
   } = settings
 
   // Private API
   let _connected = false
-
-  // Get backend ctor
-  let BackendIface = backendsIfaces[backend.type]
-  // Get backend settings
-  let backendSettings = merge({}, BackendIface.defaultSettings, backend.settings)
-  // Get cluster setings
-  let clusterSettings = merge({}, defaultClusterSettings, cluster)
-
-  // Validate backend settings
-  BackendIface.validateCtorInput(backendSettings)
-  // Validate cluster settings
-  validateStoreClusterInput(host, clusterSettings)
-
-  // Get the backend interface
-  let _backendIface = BackendIface(backendSettings)
-  // Get the cluster interface
-  let _clusterIface = StoreClusterIface(host, clusterSettings)
-
-  // Get a gRPC server instance
-  let _grpcServer = createGRPCServer({
-    backend: _backendIface,
-    cluster: _clusterIface
-  })
+  let _connecting = false
+  let _disconnecting = false
+  let _backend = BackendInterface(backend)
+  let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timed out.`))
+  let _store = StoreInterface({host, ...cluster})
+  let _grpc = GRPCInterface({port, credentials, backend: _backend, store: _store})
 
   // Public api
-  this.connect = (cb) => {
-    if (_connected) return serviceNode
-    _grpcServer.bind(`0.0.0.0:${rpcPort}`, rpcCredentials)
-    _grpcServer.start()
-    _connected = true
-    serviceNode.emit('connect')
-    return serviceNode
-  }
-  this.disconnect = (cb) => {
-    if (!_connected) return serviceNode
-    _grpcServer.tryShutdown(() => {
-      serviceNode.emit('disconnect')
-      if (isFunction(cb)) cb()
-    })
-  }
-}
+  function connect () {
+    if (_connected || _connecting || _disconnecting) return node
+    _connecting = true
 
-util.inherits(ServiceNode, EventEmitter)
+    _backend.setup(_backendSetupTimeout((err) => {
+      if (err) {
+        _connecting = false
+        console.error(err)
+        return
+      }
+      _store.bus.once('connect', () => _grpc.connect())
+      _grpc.once('connect', () => {
+        _connected = true
+        _connecting = false
+        node.emit('connect')
+      })
+      _store.bus.connect()
+    }))
+    return node
+  }
+  function disconnect () {
+    if (!_connected || _connecting || _disconnecting) return node
+    _disconnecting = true
+
+    _grpc.once('disconnect', () => _store.bus.disconnect())
+    _store.bus.once('disconnect', () => {
+      _connected = false
+      _disconnecting = true
+      node.emit('disconnect')
+    })
+    _grpc.disconnect()
+    return node
+  }
+
+  Object.assign(node, {connect, disconnect})
+  return node
+}
 
 const defaultSettings = {
-  rpcPort: 52546,
-  rpcCredentials: grpc.ServerCredentials.createInsecure(),
-  backend: {
-    type: 'cockroachdb'
-  }
+  backendSetupTimeout: 1000
 }
 
-const ctorMsg = prefix('[gRPC EventStore ServiceNode constructor]: ')
-const availableBackends = Object.keys(backendsIfaces)
-
-const validateCtorInput = (host, settings) => {
+const iMsg = prefixString('[gRPC EventStore ServiceNode]: ')
+function _validateSettings (settings) {
   let {
-    backend
+    backendSetupTimeout
   } = settings
-
-  // host
-  if (!host || !isString(host)) throw new TypeError(ctorMsg('host parameter should be a string'))
-
-  // settings.backend
-  if (!isObject(backend)) throw new TypeError(ctorMsg('settings.backend should be an object'))
-  if (!~availableBackends.indexOf(backend.type)) throw new Error(ctorMsg(`settings.backend.type should be one of [${availableBackends.join(', ')}]`))
+  if (!isInteger(backendSetupTimeout) || backendSetupTimeout < 1) throw new TypeError(iMsg('settings.setupTimeout should be a positive integer'))
 }
 
 export default ServiceNode
-export {
-  defaultSettings,
-  validateCtorInput
-}
