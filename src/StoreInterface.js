@@ -1,6 +1,6 @@
 import { merge } from 'lodash'
 import EventEmitter from 'eventemitter3'
-import MessageBus from 'dnsmq-messagebus'
+import { DNSNode } from 'dnsmq-messagebus'
 
 import { prefixString, isValidHost, isValidPort } from './utils'
 
@@ -15,7 +15,7 @@ function StoreInterface (_settings) {
 
   let store = new EventEmitter()
 
-  let _bus = MessageBus(host, {coordinationPort})
+  let _bus = DNSNode(host, {coordinationPort})
   Object.defineProperty(store, 'bus', {value: _bus})
 
   return store
