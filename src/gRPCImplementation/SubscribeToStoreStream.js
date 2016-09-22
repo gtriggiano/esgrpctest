@@ -1,4 +1,4 @@
-function SubscribeToStoreStream () {
+function SubscribeToStoreStream ({cluster}) {
   return (call) => {}
 }
 

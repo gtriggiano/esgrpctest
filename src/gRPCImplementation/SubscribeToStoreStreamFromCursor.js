@@ -1,4 +1,4 @@
-function SubscribeToStoreStreamFromCursor () {
+function SubscribeToStoreStreamFromCursor ({backend, cluster}) {
   return (call) => {}
 }
 

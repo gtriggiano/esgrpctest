@@ -1,4 +1,4 @@
-function ReadStoreStreamForwardFromCursor () {
+function ReadStoreStreamForwardFromCursor ({backend}) {
   return (call) => {}
 }
 

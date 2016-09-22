@@ -1,4 +1,4 @@
-function ReadEventTypeStreamForwardFromCursor () {
+function ReadEventTypeStreamForwardFromCursor ({backend}) {
   return (call) => {}
 }
 

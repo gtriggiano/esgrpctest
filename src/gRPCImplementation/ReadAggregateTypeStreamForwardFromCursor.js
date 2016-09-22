@@ -1,4 +1,4 @@
-function ReadAggregateTypeStreamForwardFromCursor () {
+function ReadAggregateTypeStreamForwardFromCursor ({backend}) {
   return (call) => {}
 }
 

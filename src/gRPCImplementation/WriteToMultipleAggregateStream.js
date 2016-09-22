@@ -1,4 +1,4 @@
-function WriteToMultipleAggregateStream () {
+function WriteToMultipleAggregateStream ({backend, cluster}) {
   return (call, cb) => {}
 }
 

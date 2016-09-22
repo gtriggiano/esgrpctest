@@ -1,4 +1,4 @@
-function SubscribeToAggregateStream () {
+function SubscribeToAggregateStream ({cluster}) {
   return (call) => {}
 }
 
