@@ -90,7 +90,9 @@ function _validateSettings (settings) {
   let {
     backendSetupTimeout
   } = settings
+
   if (!isInteger(backendSetupTimeout) || backendSetupTimeout < 1) throw new TypeError(iMsg('settings.setupTimeout should be a positive integer'))
+  if (backendSetupTimeout < 500) console.warn(iMsg('a value of less than 500 msec for settings.backendSetupTimeout could affect the right functioning of the EventStore backend'))
 }
 
 export default ServiceNode
