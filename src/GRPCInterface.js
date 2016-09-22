@@ -14,6 +14,7 @@ function GRPCInterface (_settings) {
 
   let grpcInstance = new EventEmitter()
 
+  // Settings
   let {
     port,
     credentials,
@@ -21,12 +22,14 @@ function GRPCInterface (_settings) {
     store
   } = settings
 
+  // Private API
   let _connected = false
   let _connecting = false
   let _disconnecting = false
   let _grpcServer = new grpc.Server()
   _grpcServer.addProtoService(EventStoreProtocol.Api.service, GRPCImplementation({backend, store}))
 
+  // Public API
   function connect () {
     if (_connected || _connecting || _disconnecting) return grpcInstance
 
