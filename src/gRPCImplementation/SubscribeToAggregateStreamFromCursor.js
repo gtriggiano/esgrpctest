@@ -1,4 +1,4 @@
-function SubscribeToAggregateStreamFromCursor ({backend, cluster}) {
+function SubscribeToAggregateStreamFromCursor ({backend, store}) {
   return (call) => {}
 }
 

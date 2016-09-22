@@ -1,4 +1,4 @@
-function SubscribeToEventTypeStream ({cluster}) {
+function SubscribeToEventTypeStream ({store}) {
   return (call) => {}
 }
 

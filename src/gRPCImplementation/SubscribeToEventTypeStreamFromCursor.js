@@ -1,4 +1,4 @@
-function SubscribeToEventTypeStreamFromCursor ({backend, cluster}) {
+function SubscribeToEventTypeStreamFromCursor ({backend, store}) {
   return (call) => {}
 }
 
