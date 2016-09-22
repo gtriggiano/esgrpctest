@@ -70,7 +70,19 @@ function ServiceNode (_settings) {
 }
 
 const defaultSettings = {
-  backendSetupTimeout: 1000
+  host: 'localhost',
+  port: 1234,
+  backendSetupTimeout: 1000,
+  backend: {
+    type: 'cockroachdb',
+    host: 'localhost',
+    port: 1234,
+    database: 'eventstore',
+    user: 'root'
+  },
+  cluster: {
+    coordinationPort: 50061
+  }
 }
 
 const iMsg = prefixString('[gRPC EventStore ServiceNode]: ')
