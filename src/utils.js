@@ -1,3 +1,4 @@
+import { isString, isInteger } from 'lodash'
 import R from 'ramda'
 let { curry } = R
 
@@ -16,7 +17,12 @@ const timeoutCallback = curry((msec, msg, cb) => {
   return _invoke
 })
 
+const isValidHost = (host) => host && isString(host)
+const isValidPort = (port) => isInteger(port) && port > 0
+
 export {
   prefixString,
-  timeoutCallback
+  timeoutCallback,
+  isValidHost,
+  isValidPort
 }
