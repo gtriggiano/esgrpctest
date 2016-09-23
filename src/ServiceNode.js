@@ -28,7 +28,7 @@ function ServiceNode (_settings) {
   let _backend = BackendInterface(backend)
   let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timed out.`))
   let _store = StoreInterface({host, ...cluster})
-  let _grpc = GRPCInterface({port, credentials, backend: _backend, store: _store})
+  let _grpcServer = GRPCInterface({port, credentials, backend: _backend, store: _store})
 
   // Public api
   function connect () {
@@ -41,13 +41,13 @@ function ServiceNode (_settings) {
         console.error(err)
         return
       }
-      _store.bus.once('connect', () => _grpc.connect())
-      _grpc.once('connect', () => {
+      _store.once('connect', () => _grpcServer.connect())
+      _grpcServer.once('connect', () => {
         _connected = true
         _connecting = false
         node.emit('connect')
       })
-      _store.bus.connect()
+      _store.connect()
     }))
     return node
   }
@@ -55,17 +55,18 @@ function ServiceNode (_settings) {
     if (!_connected || _connecting || _disconnecting) return node
     _disconnecting = true
 
-    _grpc.once('disconnect', () => _store.bus.disconnect())
-    _store.bus.once('disconnect', () => {
+    _grpcServer.once('disconnect', () => _store.disconnect())
+    _store.once('disconnect', () => {
       _connected = false
       _disconnecting = true
       node.emit('disconnect')
     })
-    _grpc.disconnect()
+    _grpcServer.disconnect()
     return node
   }
 
-  Object.assign(node, {connect, disconnect})
+  Object.defineProperty(node, 'connect', {value: connect})
+  Object.defineProperty(node, 'disconnect', {value: disconnect})
   return node
 }
 
