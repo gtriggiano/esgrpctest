@@ -1,35 +1,27 @@
 import should from 'should/as-function'
-import sinon from 'sinon'
 import Rx from 'rxjs'
 
 import FixtureBusNode from '../tests/FixtureBusNode'
 
 import {
-  getEventsStreamFromBusNode
+  eventStreamFromBus
 } from './utils'
 
 describe('Utilities', () => {
-  describe('getEventsStreamFromBusNode(busNode[, debounceTime])', () => {
+  describe('eventStreamFromBus(busNode[, delayTime])', () => {
     function _fireEventsListsOnBusNode (busNode, eventsLists) {
       Object.keys(eventsLists).forEach(time => {
         setTimeout(function () {
-          busNode.emit('StoredEventsSeries', JSON.stringify(eventsLists[time].map(id => ({id}))))
+          busNode.emit('StoredEvents', JSON.stringify(eventsLists[time].map(id => ({id}))))
         }, parseInt(time, 10))
       })
     }
 
     it('should return a stream of events as an instance of Rx.Observable', () => {
-      let stream = getEventsStreamFromBusNode(FixtureBusNode())
+      let stream = eventStreamFromBus(FixtureBusNode())
       should(stream).be.an.instanceof(Rx.Observable)
     })
-    it('should call bus.subscribe(StoredEventsSeries)', () => {
-      let testBusNode = FixtureBusNode()
-      let spy = sinon.spy(testBusNode, 'subscribe')
-      getEventsStreamFromBusNode(testBusNode)
-      should(testBusNode.subscribe.calledWith('StoredEventsSeries')).equal(true)
-      spy.restore()
-    })
-    it('the returned stream emits the events coming from `busNode` ensuring the right order within a certain debounce time (default 50 ms)', function (done) {
+    it('the returned stream emits the events coming from `busNode` delayed by `delayTime` to ensure the right ordering', function (done) {
       let sourceEventsLists = {
         0: [1], // Buffer 1
         80: [2, 3], // Buffer 2
@@ -40,7 +32,7 @@ describe('Utilities', () => {
       }
 
       let testBusNode = FixtureBusNode()
-      let testStream = getEventsStreamFromBusNode(testBusNode)
+      let testStream = eventStreamFromBus(testBusNode)
 
       let received = []
       let subscription = testStream
@@ -58,19 +50,19 @@ describe('Utilities', () => {
 
       _fireEventsListsOnBusNode(testBusNode, sourceEventsLists)
     })
-    it('the debounce time should be configurable through the second parameter', function (done) {
-      let testDebounceTime = 30
+    it('the delay time should be configurable through the second parameter', function (done) {
+      let testDelayTime = 10
       let sourceEventsLists = {
         0: [1], // Buffer 1
-        80: [2, 3], //  Buffer 2
-        130: [8, 9],
-        150: [6, 7], // Buffer 3
+        60: [2, 3], //  Buffer 2
+        120: [8, 9],
+        130: [6, 7], // Buffer 3
         200: [4, 5], // Buffer 4
         260: [10] // Buffer 5
       }
 
       let testBusNode = FixtureBusNode()
-      let testStream = getEventsStreamFromBusNode(testBusNode, testDebounceTime)
+      let testStream = eventStreamFromBus(testBusNode, testDelayTime)
 
       let received = []
       let subscription = testStream
