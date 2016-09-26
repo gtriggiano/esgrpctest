@@ -1,12 +1,12 @@
 import grpc from 'grpc'
-import { isInteger, merge } from 'lodash'
+import { merge } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
 const PROTOCOL_FILE_PATH = `${__dirname}/../gRPCEventStore.proto`
 const EventStoreProtocol = grpc.load(PROTOCOL_FILE_PATH).gRPCEventStore
 
 import GRPCImplementation from './GRPCImplementation'
-import { prefixString } from './utils'
+import { prefixString, isPositiveInteger } from './utils'
 
 function GRPCInterface (_settings) {
   let settings = merge({}, defaultSettings, _settings)
@@ -37,7 +37,6 @@ function GRPCInterface (_settings) {
     _grpcServer.bind(`0.0.0.0:${port}`, credentials)
     _grpcServer.start()
     grpcInstance.emit('connect')
-
     _connected = true
     _connecting = false
     return grpcInstance
@@ -62,7 +61,8 @@ function GRPCInterface (_settings) {
     return grpcInstance
   }
 
-  Object.assign(grpcInstance, {connect, disconnect})
+  Object.defineProperty(grpcInstance, 'connect', {value: connect})
+  Object.defineProperty(grpcInstance, 'disconnect', {value: disconnect})
   return grpcInstance
 }
 
@@ -74,10 +74,12 @@ const defaultSettings = {
 const iMsg = prefixString('[gRPC EventStore GRPCInterface]: ')
 function _validateSettings (settings) {
   let {
-    port
+    port,
+    credentials
   } = settings
 
-  if (!isInteger(port) || port < 1) throw new TypeError(iMsg('settings.port should be a positive integer'))
+  if (!isPositiveInteger(port)) throw new TypeError(iMsg('settings.port should be a positive integer'))
+  if (!(credentials instanceof grpc.ServerCredentials)) throw new TypeError(iMsg('settings.credentials should be an instance of grpc.ServerCredentials'))
 }
 
 export default GRPCInterface
