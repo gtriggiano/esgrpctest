@@ -6,7 +6,7 @@ import BackendInterface, { CustomBackendWrapper } from './BackendInterface'
 import backends from './BackendInterface/backends'
 const availableBackends = Object.keys(backends)
 
-describe.only('BackendInterface(settings)', function () {
+describe('BackendInterface(settings)', function () {
   it('should be a function', () => { should(BackendInterface).be.a.Function() })
   it('should return `settings.backend` if `settings` is an instance of CustomBackendWrapper', () => {
     let s = {}
