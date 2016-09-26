@@ -98,7 +98,7 @@ describe('Utilities', () => {
       let minLength = random(5, 20)
       should(zeropad(i, minLength).length >= minLength).be.True()
     })
-    it('should pad `i` with zeroes if Sring(i).length < minLength', () => {
+    it('should pad String(i) with zeroes if String(i).length < minLength', () => {
       let str = zeropad('abc', 5)
       should(str).equal('00abc')
     })
@@ -117,7 +117,7 @@ describe('Utilities', () => {
       let stream = eventStreamFromBus(FixtureBusNode())
       should(stream).be.an.instanceof(Rx.Observable)
     })
-    it('should delay the output stream by (more or less) `delayTime` ms', function (done) {
+    it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `bus`', function (done) {
       let delayTime = random(120, 160)
       let testBusNode = FixtureBusNode()
       let testStream = eventStreamFromBus(testBusNode, delayTime)
@@ -134,7 +134,7 @@ describe('Utilities', () => {
       let inputTime = process.hrtime()
       testBusNode.emit('StoredEvents', JSON.stringify([evt]))
     })
-    it('should ensure the right order of events received within `delayTime`', function (done) {
+    it('should ensure the right order of events emitted by `bus` within `delayTime`, ordering by event.id', function (done) {
       // timeOfBusEmission: [eventId, ...]
       let sourceEventsLists = {
         0: [1],
