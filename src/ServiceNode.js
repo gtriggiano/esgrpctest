@@ -96,4 +96,6 @@ function _validateSettings (settings) {
   if (backendSetupTimeout < 500) console.warn(iMsg('a value of less than 500 msec for settings.backendSetupTimeout could affect the right functioning of the EventStore backend'))
 }
 
+ServiceNode.customBackend = BackendInterface.customBackend
+
 export default ServiceNode
