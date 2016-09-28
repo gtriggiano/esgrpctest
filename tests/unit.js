@@ -9,7 +9,7 @@ describe('gRPC Event Store Package Unit Tests', function () {
     should(EventStore).be.a.Function()
   })
   it(`let eventStoreNode = EventStore(); eventStoreNode instanceof EventEmitter === true`, () => {
-    let eventStore = EventStore('development')
+    let eventStore = EventStore()
     should(eventStore).be.an.instanceof(EventEmitter)
   })
 
