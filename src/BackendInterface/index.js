@@ -4,7 +4,6 @@ import backends from './backends'
 import { prefixString, isValidString } from '../utils'
 
 const availableBackends = Object.keys(backends)
-console.log(availableBackends)
 
 function BackendInterface (_settings) {
   let customBackendInstance = _settings instanceof CustomBackendWrapper
@@ -21,7 +20,11 @@ function BackendInterface (_settings) {
 }
 
 const defaultSettings = {
-  type: 'cockroachdb'
+  type: 'cockroachdb',
+  host: 'localhost',
+  port: 1234,
+  database: 'eventstore',
+  user: 'root'
 }
 
 const iMsg = prefixString('[gRPC EventStore BackendInterface]: ')
