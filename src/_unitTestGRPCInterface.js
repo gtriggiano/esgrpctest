@@ -30,7 +30,7 @@ describe('GRPCInterface(settings)', function () {
     should(notThrowing).not.throw()
     should(throwing).throw()
   })
-  describe('grpcIface = GRPCInterface()', () => {
+  describe('grpcIface', () => {
     it('should be an instance of EventEmitter', () => {
       let grpcIface = GRPCInterface()
       should(grpcIface).be.an.instanceof(EventEmitter)

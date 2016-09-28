@@ -22,7 +22,7 @@ describe('ServiceNode(settings)', function () {
     should(stub.called).equal(true)
     stub.restore()
   })
-  describe('serviceNode = ServiceNode()', () => {
+  describe('serviceNode', () => {
     it('should be an instance of EventEmitter', () => {
       let node = ServiceNode()
       should(node).be.an.instanceof(EventEmitter)

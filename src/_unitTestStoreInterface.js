@@ -26,7 +26,7 @@ describe('StoreInterface(settings)', function () {
     should(throwing).throw()
     should(throwing1).throw()
   })
-  describe('storeIface = StoreInterface()', () => {
+  describe('storeIface', () => {
     it('should be an instanceof EventEmitter', () => {
       let iface = StoreInterface()
       should(iface instanceof EventEmitter).be.True()
