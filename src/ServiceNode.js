@@ -1,4 +1,4 @@
-import { isInteger, merge } from 'lodash'
+import { isInteger, assign } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
 import BackendInterface from './BackendInterface'
@@ -7,7 +7,7 @@ import StoreInterface from './StoreInterface'
 import { prefixString, timeoutCallback } from './utils'
 
 function ServiceNode (_settings) {
-  let settings = merge({}, defaultSettings, _settings)
+  let settings = assign({}, defaultSettings, _settings)
   _validateSettings(settings)
 
   let node = new EventEmitter()
@@ -15,20 +15,25 @@ function ServiceNode (_settings) {
   let {
     host,
     port,
-    credentials,
+    coordinationPort,
     backendSetupTimeout,
-    backend,
-    cluster
+    credentials,
+    backend
   } = settings
 
   // Private API
   let _connected = false
   let _connecting = false
   let _disconnecting = false
-  let _backend = BackendInterface(backend)
+  let _backend = BackendInterface(backend || {})
   let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timed out.`))
-  let _store = StoreInterface({host, ...cluster})
-  let _grpcServer = GRPCInterface({port, credentials, backend: _backend, store: _store})
+  let _store = StoreInterface({host, coordinationPort})
+  let _grpcServer = GRPCInterface(assign(
+    {},
+    {backend: _backend, store: _store},
+    port ? {port} : {},
+    credentials ? {credentials} : {}
+  ))
 
   // Public api
   function connect () {
@@ -72,18 +77,13 @@ function ServiceNode (_settings) {
 
 const defaultSettings = {
   host: 'localhost',
-  port: 1234,
-  backendSetupTimeout: 1000,
-  backend: {
-    type: 'cockroachdb',
-    host: 'localhost',
-    port: 1234,
-    database: 'eventstore',
-    user: 'root'
-  },
-  cluster: {
-    coordinationPort: 50061
-  }
+  coordinationPort: 50061,
+  backendSetupTimeout: 1000
+  /*
+  port
+  credentials
+  backend
+  */
 }
 
 const iMsg = prefixString('[gRPC EventStore ServiceNode]: ')
