@@ -38,6 +38,8 @@ const eventStreamFromBus = (bus, delayTime) => {
     byId: {}
   }
 
+  // We create a multicasted observable passing events through a Subject
+  let subject = new Rx.Subject()
   let stream = Rx.Observable.fromEvent(bus, 'StoredEvents')
     .map(msg => JSON.parse(msg))
     .flatMap(events => Rx.Observable.from(events))
@@ -55,6 +57,10 @@ const eventStreamFromBus = (bus, delayTime) => {
       delete receivedEvents.byId[oldestEventId]
       return oldestEvent
     })
+    .multicast(subject)
+
+  // Stream is a Rx.ConnectableObservable
+  stream.connect()
 
   return stream
 }

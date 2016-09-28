@@ -113,9 +113,9 @@ describe('Utilities', () => {
     }
 
     it('should be a function', () => should(eventStreamFromBus).be.a.Function())
-    it('should return an instance of Rx.Observable', () => {
+    it('should return an instance of Rx.ConnectableObservable', () => {
       let stream = eventStreamFromBus(FixtureBusNode())
-      should(stream).be.an.instanceof(Rx.Observable)
+      should(stream).be.an.instanceof(Rx.ConnectableObservable)
     })
     it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `bus`', function (done) {
       let delayTime = random(120, 160)
@@ -126,7 +126,7 @@ describe('Utilities', () => {
         let outputTime = process.hrtime(inputTime)
         let msDiff = outputTime[0] * 1e3 + outputTime[1] / 1e6
         should(msDiff > delayTime).be.True()
-        should(msDiff < delayTime + 5).be.True()
+        should(msDiff < delayTime + 10).be.True()
         subscription.unsubscribe()
         done()
       })
