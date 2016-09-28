@@ -31,9 +31,9 @@ describe('StoreInterface(settings)', function () {
       let iface = StoreInterface()
       should(iface instanceof EventEmitter).be.True()
     })
-    it('storeIface.eventStream should be an instance of Rx.Observable', () => {
+    it('storeIface.eventStream should be an instance of Rx.ConnectableObservable', () => {
       let iface = StoreInterface()
-      should(iface.eventsStream).be.an.instanceof(Rx.Observable)
+      should(iface.eventsStream).be.an.instanceof(Rx.ConnectableObservable)
     })
     it('storeIface.connect, storeIface.disconnect and storeIface.publishEvents should be functions', () => {
       let iface = StoreInterface()
