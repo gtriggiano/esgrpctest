@@ -28,7 +28,7 @@ describe('GRPCInterface(settings)', function () {
       GRPCInterface({credentials: {}})
     }
     should(notThrowing).not.throw()
-    // should(throwing).throw()
+    should(throwing).throw()
   })
   describe('grpcIface = GRPCInterface()', () => {
     it('should be an instance of EventEmitter', () => {

@@ -1,5 +1,5 @@
 import grpc from 'grpc'
-import { merge } from 'lodash'
+import { assign } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
 const PROTOCOL_FILE_PATH = `${__dirname}/../gRPCEventStore.proto`
@@ -9,7 +9,7 @@ import GRPCImplementation from './GRPCImplementation'
 import { prefixString, isPositiveInteger } from './utils'
 
 function GRPCInterface (_settings) {
-  let settings = merge({}, defaultSettings, _settings)
+  let settings = assign({}, defaultSettings, _settings)
   _validateSettings(settings)
 
   let grpcInstance = new EventEmitter()
