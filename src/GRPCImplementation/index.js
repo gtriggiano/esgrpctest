@@ -1,4 +1,5 @@
 // Import service methods
+import GetLastAggregateSnaphot from './GetLastAggregateSnaphot'
 import Ping from './Ping'
 import ReadAggregateStreamForwardFromVersion from './ReadAggregateStreamForwardFromVersion'
 import ReadAggregateTypesStreamForwardFromEvent from './ReadAggregateTypesStreamForwardFromEvent'
@@ -18,6 +19,7 @@ import WriteToMultipleAggregateStream from './WriteToMultipleAggregateStream'
 function GRPCImplementationFactory ({backend, store}) {
   let interfaces = {backend, store}
   return {
+    getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
     ping: Ping(interfaces),
     readAggregateStreamForwardFromVersion: ReadAggregateStreamForwardFromVersion(interfaces),
     readAggregateTypesStreamForwardFromEvent: ReadAggregateTypesStreamForwardFromEvent(interfaces),
