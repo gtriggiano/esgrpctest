@@ -33,6 +33,9 @@ service Api {
   // Returns an ending stream of all the events belonging to an aggregate, having a version number > than the provided one and stored before the time of request.
   // Clients can specify a `limit` to receive just N events.
   rpc ReadAggregateStreamForwardFromVersion (BoundedAggregateStreamRequest) returns (stream StoredEvent);
+  // Returns the last snapshot of an aggregate.
+  rpc GetLastAggregateSnaphot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
+
 
 
   ////////////////////////////////
@@ -98,11 +101,17 @@ message AggregateSnapshot {
   string data = 3;
 }
 
+message LastAggregateSnapshotResponse {
+  oneof voidOrSnapshot {
+    EmptyDTO notFound = 1;
+    AggregateSnapshot snapshot = 2;
+  }
+}
+
 message AggregateIdentity {
   string uuid = 1;
   string type = 2;
 }
-
 
 message BoundedStoreStreamRequest {
   int64 fromEventId = 1;
@@ -139,7 +148,7 @@ message WriteToAggregateStreamRequest {
   AggregateIdentity aggregateIdentity = 1;
   sint32 expectedAggregateVersion = 2;
   repeated Event events = 3;
-  string snapshot = 2;
+  string snapshot = 4;
 }
 
 message WriteToMultipleAggregateStreamRequest {
