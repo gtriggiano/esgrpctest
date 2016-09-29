@@ -1,4 +1,4 @@
-import { isValidString } from '../utils'
+import { isValidString } from '../../utils'
 
 function SubscribeToAggregateStream ({store}) {
   return (call) => {

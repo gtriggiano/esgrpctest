@@ -1,38 +1,57 @@
-// Import service methods
-import GetLastAggregateSnaphot from './GetLastAggregateSnaphot'
 import Ping from './Ping'
-import ReadAggregateStreamForwardFromVersion from './ReadAggregateStreamForwardFromVersion'
-import ReadAggregateTypesStreamForwardFromEvent from './ReadAggregateTypesStreamForwardFromEvent'
-import ReadEventTypesStreamForwardFromEvent from './ReadEventTypesStreamForwardFromEvent'
-import ReadStoreStreamForwardFromEvent from './ReadStoreStreamForwardFromEvent'
-import SubscribeToAggregateStream from './SubscribeToAggregateStream'
-import SubscribeToAggregateStreamFromVersion from './SubscribeToAggregateStreamFromVersion'
-import SubscribeToAggregateTypesStream from './SubscribeToAggregateTypesStream'
-import SubscribeToAggregateTypesStreamFromEvent from './SubscribeToAggregateTypesStreamFromEvent'
-import SubscribeToEventTypesStream from './SubscribeToEventTypesStream'
-import SubscribeToEventTypesStreamFromEvent from './SubscribeToEventTypesStreamFromEvent'
-import SubscribeToStoreStream from './SubscribeToStoreStream'
-import SubscribeToStoreStreamFromEvent from './SubscribeToStoreStreamFromEvent'
-import WriteToAggregateStream from './WriteToAggregateStream'
-import WriteToMultipleAggregateStream from './WriteToMultipleAggregateStream'
+
+// Aggregates Queries
+import GetLastAggregateSnaphot from './aggregatesQueries/GetLastAggregateSnaphot'
+import ReadAggregateStreamForwardFromVersion from './aggregatesQueries/ReadAggregateStreamForwardFromVersion'
+import SubscribeToAggregateStream from './aggregatesQueries/SubscribeToAggregateStream'
+import SubscribeToAggregateStreamFromVersion from './aggregatesQueries/SubscribeToAggregateStreamFromVersion'
+
+// Aggregates Types Queries
+import ReadAggregateTypesStreamForwardFromEvent from './aggregatesTypesQueries/ReadAggregateTypesStreamForwardFromEvent'
+import SubscribeToAggregateTypesStream from './aggregatesTypesQueries/SubscribeToAggregateTypesStream'
+import SubscribeToAggregateTypesStreamFromEvent from './aggregatesTypesQueries/SubscribeToAggregateTypesStreamFromEvent'
+
+// Events Types Queries
+import ReadEventTypesStreamForwardFromEvent from './eventsTypesQueries/ReadEventTypesStreamForwardFromEvent'
+import SubscribeToEventTypesStream from './eventsTypesQueries/SubscribeToEventTypesStream'
+import SubscribeToEventTypesStreamFromEvent from './eventsTypesQueries/SubscribeToEventTypesStreamFromEvent'
+
+// Store Queries
+import ReadStoreStreamForwardFromEvent from './storeQueries/ReadStoreStreamForwardFromEvent'
+import SubscribeToStoreStream from './storeQueries/SubscribeToStoreStream'
+import SubscribeToStoreStreamFromEvent from './storeQueries/SubscribeToStoreStreamFromEvent'
+
+// Write Procedures
+import WriteToAggregateStream from './writeProcedures/WriteToAggregateStream'
+import WriteToMultipleAggregateStream from './writeProcedures/WriteToMultipleAggregateStream'
 
 function GRPCImplementationFactory ({backend, store}) {
   let interfaces = {backend, store}
   return {
-    getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
     ping: Ping(interfaces),
+
+    // Aggregates Queries
+    getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
     readAggregateStreamForwardFromVersion: ReadAggregateStreamForwardFromVersion(interfaces),
-    readAggregateTypesStreamForwardFromEvent: ReadAggregateTypesStreamForwardFromEvent(interfaces),
-    readEventTypesStreamForwardFromEvent: ReadEventTypesStreamForwardFromEvent(interfaces),
-    readStoreStreamForwardFromEvent: ReadStoreStreamForwardFromEvent(interfaces),
     subscribeToAggregateStream: SubscribeToAggregateStream(interfaces),
     subscribeToAggregateStreamFromVersion: SubscribeToAggregateStreamFromVersion(interfaces),
+
+    // Aggregates Types Queries
+    readAggregateTypesStreamForwardFromEvent: ReadAggregateTypesStreamForwardFromEvent(interfaces),
     subscribeToAggregateTypesStream: SubscribeToAggregateTypesStream(interfaces),
     subscribeToAggregateTypesStreamFromEvent: SubscribeToAggregateTypesStreamFromEvent(interfaces),
+
+    // Events Types Queries
+    readEventTypesStreamForwardFromEvent: ReadEventTypesStreamForwardFromEvent(interfaces),
     subscribeToEventTypesStream: SubscribeToEventTypesStream(interfaces),
     subscribeToEventTypesStreamFromEvent: SubscribeToEventTypesStreamFromEvent(interfaces),
+
+    // Store Queries
+    readStoreStreamForwardFromEvent: ReadStoreStreamForwardFromEvent(interfaces),
     subscribeToStoreStream: SubscribeToStoreStream(interfaces),
     subscribeToStoreStreamFromEvent: SubscribeToStoreStreamFromEvent(interfaces),
+
+    // Write Procedures
     writeToAggregateStream: WriteToAggregateStream(interfaces),
     writeToMultipleAggregateStream: WriteToMultipleAggregateStream(interfaces)
   }

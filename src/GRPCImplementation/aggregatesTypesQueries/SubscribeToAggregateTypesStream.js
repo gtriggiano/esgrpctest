@@ -1,5 +1,6 @@
 import { every } from 'lodash'
-import { isValidString } from '../utils'
+
+import { isValidString } from '../../utils'
 
 function SubscribeToAggregateTypesStream ({store}) {
   return (call) => {
