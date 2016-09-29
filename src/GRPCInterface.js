@@ -67,7 +67,7 @@ function GRPCInterface (_settings) {
 }
 
 const defaultSettings = {
-  port: 52546,
+  port: 50051,
   credentials: grpc.ServerCredentials.createInsecure()
 }
 
