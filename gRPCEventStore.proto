@@ -76,42 +76,42 @@ service Api {
 message EmptyDTO {}
 
 message Event {
-  required string type = 1;
+  string type = 1;
   string data = 2;
   string metadata = 3;
 }
 
 message StoredEvent {
-  required int64 id = 1;
-  required string type = 2;
-  required AggregateIdentity aggregateIdentity = 3;
-  required string storedOn = 4;
-  required int32 sequenceNumber = 5;
-  required string data = 6;
-  required string metadata = 7;
+  int64 id = 1;
+  string type = 2;
+  AggregateIdentity aggregateIdentity = 3;
+  string storedOn = 4;
+  int32 sequenceNumber = 5;
+  string data = 6;
+  string metadata = 7;
   string transactionId = 8;
 }
 
-message Aggregate {
-  required AggregateIdentity identity = 1;
-  required int32 version = 2;
-  repeated StoredEvent events = 3;
+message AggregateSnapshot {
+  AggregateIdentity aggregateIdentity = 1;
+  int32 version = 2;
+  string data = 3;
 }
 
 message AggregateIdentity {
-  required string uuid = 1;
-  required string type = 2;
+  string uuid = 1;
+  string type = 2;
 }
 
 
 message BoundedStoreStreamRequest {
-  required int64 fromEventId = 1;
+  int64 fromEventId = 1;
   int32 limit = 2;
 }
 
 message BoundedAggregateStreamRequest {
-  required AggregateIdentity aggregateIdentity = 1;
-  required int32 fromVersion = 2;
+  AggregateIdentity aggregateIdentity = 1;
+  int32 fromVersion = 2;
   int32 limit = 3;
 }
 
@@ -121,7 +121,7 @@ message AggregateTypesStreamRequest {
 
 message BoundedAggregateTypesStreamRequest {
   repeated string aggregateTypes = 1;
-  required int64 fromEventId = 2;
+  int64 fromEventId = 2;
   int32 limit = 3;
 }
 
@@ -136,9 +136,10 @@ message BoundedEventTypesStreamRequest {
 }
 
 message WriteToAggregateStreamRequest {
-  required AggregateIdentity aggregateIdentity = 1;
-  required sint32 expectedAggregateVersion = 2;
+  AggregateIdentity aggregateIdentity = 1;
+  sint32 expectedAggregateVersion = 2;
   repeated Event events = 3;
+  string snapshot = 2;
 }
 
 message WriteToMultipleAggregateStreamRequest {
