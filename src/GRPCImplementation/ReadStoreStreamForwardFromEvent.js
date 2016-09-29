@@ -1,5 +1,5 @@
-function ReadStoreStreamForwardFromCursor ({backend}) {
+function ReadStoreStreamForwardFromEvent ({backend}) {
   return (call) => {}
 }
 
-export default ReadStoreStreamForwardFromCursor
+export default ReadStoreStreamForwardFromEvent

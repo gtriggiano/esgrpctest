@@ -1,5 +1,5 @@
-function SubscribeToStoreStreamFromCursor ({backend, store}) {
+function SubscribeToStoreStreamFromEvent ({backend, store}) {
   return (call) => {}
 }
 
-export default SubscribeToStoreStreamFromCursor
+export default SubscribeToStoreStreamFromEvent

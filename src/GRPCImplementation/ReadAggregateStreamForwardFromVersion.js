@@ -1,5 +1,5 @@
-function ReadAggregateStreamForwardFromCursor ({backend}) {
+function ReadAggregateStreamForwardFromVersion ({backend}) {
   return (call) => {}
 }
 
-export default ReadAggregateStreamForwardFromCursor
+export default ReadAggregateStreamForwardFromVersion

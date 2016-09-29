@@ -1,5 +1,5 @@
-function SubscribeToAggregateStreamFromCursor ({backend, store}) {
+function SubscribeToAggregateStreamFromVersion ({backend, store}) {
   return (call) => {}
 }
 
-export default SubscribeToAggregateStreamFromCursor
+export default SubscribeToAggregateStreamFromVersion
