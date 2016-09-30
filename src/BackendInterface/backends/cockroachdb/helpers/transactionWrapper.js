@@ -1,8 +1,18 @@
-import transactionBegin from '../operations/transactionBegin'
-import transactionCommit from '../operations/transactionCommit'
-import transactionReleaseSavepoint from '../operations/transactionReleaseSavepoint'
-import transactionRollback from '../operations/transactionRollback'
-import transactionRollbackToSavepoint from '../operations/transactionRollbackToSavepoint'
+function transactionBegin (client, done) {
+  client.query('BEGIN; SAVEPOINT cockroach_restart', (err) => done(err))
+}
+function transactionCommit (client, done) {
+  client.query('COMMIT', (err) => done(err))
+}
+function transactionRollback (client, done) {
+  client.query('ROLLBACK', (err) => done(err))
+}
+function transactionReleaseSavepoint (client, done) {
+  client.query('RELEASE SAVEPOINT cockroach_restart', (err) => done(err))
+}
+function transactionRollbackToSavepoint (client, done) {
+  client.query('ROLLBACK TO SAVEPOINT cockroach_restart', (err) => done(err))
+}
 
 function handleOperationError (client, err, cb) {
   if (err.code === '40001') {
