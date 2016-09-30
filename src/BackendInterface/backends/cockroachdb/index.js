@@ -1,26 +1,43 @@
-import { merge } from 'lodash'
-import EventEmitter from 'eventemitter3'
+import { assign, forEach } from 'lodash'
 
+import apiHandlersFactories from './api'
+import { setupConnectionsPool, getConnection } from './helpers/db'
+import setupDatabase from './operations/setup'
 import { prefixString, isValidString, isPositiveInteger } from './../../../utils'
 
 function CockroachDBBackend (_settings) {
-  let settings = merge({}, defaultSettings, _settings)
+  let settings = assign({}, defaultSettings, _settings)
   _validateSettings(settings)
+
+  setupConnectionsPool(settings)
 
   let backend = {}
 
   // Public API
-  function setup (done) { done() }
+  function setup (done) {
+    getConnection((err, {client, release}) => {
+      if (err) return done(err)
+      setupDatabase(client, (err) => {
+        done(err)
+        release()
+      })
+    })
+  }
 
   Object.defineProperty(backend, 'setup', {value: setup})
+  forEach(apiHandlersFactories, (factory, handlerName) => {
+    Object.defineProperty(backend, handlerName, {value: factory(getConnection)})
+  })
   return backend
 }
 
 const defaultSettings = {
   host: 'localhost',
-  port: 1234,
+  port: 26257,
   database: 'eventstore',
-  user: 'root'
+  user: 'root',
+  max: 10,
+  idleTimeoutMillis: 30000
 }
 
 const iMsg = prefixString('[gRPC EventStore Backend CockroachDB]: ')
