@@ -11,7 +11,8 @@ import {
   isValidString,
   isPositiveInteger,
   zeropad,
-  eventStreamFromBus
+  eventsStreamFromBus,
+  eventsStreamFromBackendEmitter
 } from './utils'
 
 describe('Utilities', () => {
@@ -103,7 +104,7 @@ describe('Utilities', () => {
       should(str).equal('00abc')
     })
   })
-  describe('eventStreamFromBus(busNode[, delayTime = 100])', () => {
+  describe('eventsStreamFromBus(busNode[, delayTime = 100])', () => {
     function _fireEventsListsOnBusNode (busNode, eventsLists) {
       Object.keys(eventsLists).forEach(time => {
         setTimeout(function () {
@@ -112,15 +113,15 @@ describe('Utilities', () => {
       })
     }
 
-    it('should be a function', () => should(eventStreamFromBus).be.a.Function())
+    it('should be a function', () => should(eventsStreamFromBus).be.a.Function())
     it('should return an instance of Rx.ConnectableObservable', () => {
-      let stream = eventStreamFromBus(FixtureBusNode())
+      let stream = eventsStreamFromBus(FixtureBusNode())
       should(stream).be.an.instanceof(Rx.ConnectableObservable)
     })
     it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `bus`', function (done) {
       let delayTime = random(120, 160)
       let testBusNode = FixtureBusNode()
-      let testStream = eventStreamFromBus(testBusNode, delayTime)
+      let testStream = eventsStreamFromBus(testBusNode, delayTime)
 
       let subscription = testStream.subscribe(() => {
         let outputTime = process.hrtime(inputTime)
@@ -146,7 +147,7 @@ describe('Utilities', () => {
       }
 
       let testBusNode = FixtureBusNode()
-      let testStream = eventStreamFromBus(testBusNode)
+      let testStream = eventsStreamFromBus(testBusNode)
 
       let received = []
       let subscription = testStream
@@ -164,5 +165,8 @@ describe('Utilities', () => {
 
       _fireEventsListsOnBusNode(testBusNode, sourceEventsLists)
     })
+  })
+  describe('eventsStreamFromBackendEmitter(backendEmitter)', () => {
+    it('should be tested')
   })
 })

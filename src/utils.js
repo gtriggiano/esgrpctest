@@ -1,7 +1,5 @@
-import { isString, isInteger, range } from 'lodash'
+import { isString, isInteger, range, curry } from 'lodash'
 import Rx from 'rxjs'
-import R from 'ramda'
-let { curry } = R
 
 const prefixString = curry((prefix, str) => `${prefix}${str}`)
 
@@ -31,20 +29,19 @@ const zeropad = (i, minLength) => {
   return str
 }
 
-const eventStreamFromBus = (bus, delayTime) => {
+const eventsStreamFromBus = (bus, delayTime) => {
   delayTime = delayTime || 100
   let receivedEvents = {
     ids: [],
     byId: {}
   }
 
-  // We create a multicasted observable passing events through a Subject
-  let subject = new Rx.Subject()
+  // We create an hot observable through the publish().connect() sequence
   let stream = Rx.Observable.fromEvent(bus, 'StoredEvents')
     .map(msg => JSON.parse(msg))
     .flatMap(events => Rx.Observable.from(events))
     .map(evt => {
-      let evtId = zeropad(evt.id, 20)
+      let evtId = zeropad(evt.id, 25)
       receivedEvents.ids.push(evtId)
       receivedEvents.ids.sort()
       receivedEvents.byId[evtId] = evt
@@ -57,12 +54,19 @@ const eventStreamFromBus = (bus, delayTime) => {
       delete receivedEvents.byId[oldestEventId]
       return oldestEvent
     })
-    .multicast(subject)
+    .publish()
 
-  // Stream is a Rx.ConnectableObservable
-  stream.connect()
+  stream.connect() // TODO: should we take a reference to this subscription to end it later?
 
   return stream
+}
+
+const eventsStreamFromBackendEmitter = (e) => {
+  let evt = Rx.Observable.fromEvent(e, 'event')
+  let error = Rx.Observable.fromEvent(e, 'error').flatMap(err => Rx.Observable.throw(err))
+  let end = Rx.Observable.fromEvent(e, 'end')
+
+  return evt.merge(error).takeUntil(end)
 }
 
 export {
@@ -71,5 +75,26 @@ export {
   isValidString,
   isPositiveInteger,
   zeropad,
-  eventStreamFromBus
+  eventsStreamFromBus,
+  eventsStreamFromBackendEmitter
 }
+
+// var subject = new Rx.Subject()
+// var rpSubject = new Rx.ReplaySubject()
+// var evt = Rx.Observable.interval(1000).map(function (_, i) { return i })
+// var live = Rx.Observable.interval(1000).map(function (_, i) { return (i + 1) * 100 }).multicast(subject)
+// live.connect()
+// var rpSubscripion = live.subscribe(rpSubject)
+//
+// var err = Rx.Observable.timer(15000).flatMap(function () { return Rx.Observable.throw(new Error()) })
+// var end = Rx.Observable.timer(10000).map(function () { return 'end' })
+//
+// var back = evt.merge(err).takeUntil(end)
+// var final = back.concat(rpSubject)
+// // var final = back.forkJoin(live.map(function (x) { return x }))
+//
+// final.subscribe(
+//   function (a) { console.log(a) },
+//   function (e) { console.log('errore') },
+//   function () { console.log('finito!!!') }
+// )
