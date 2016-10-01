@@ -1,38 +1,51 @@
 import Rx from 'rxjs'
 
-import { every, pull } from 'lodash'
+import { every } from 'lodash'
 
-import { isValidString } from '../../utils'
+import { isValidString, eventsStreamFromBackendEmitter } from '../../utils'
 
 function SubscribeToAggregateTypesStreamFromEvent ({backend, store}) {
   return (call) => {
-    // Validate and parse input
     let { aggregateTypes, fromEventId } = call.request
+
+    // Validate request
+    if (!aggregateTypes.length) return call.emit('error', new TypeError('aggregateTypes should contain one or more non empty strings'))
     if (!every(aggregateTypes, isValidString)) return call.emit('error', new TypeError('aggregateTypes should be a list of non empty strings'))
-    fromEventId = fromEventId >= 0 ? fromEventId : 0
+    fromEventId = fromEventId >= -1 ? fromEventId : -1
 
     // Call backend
     let params = {aggregateTypes, fromEventId}
     let backendResults = backend.getEventsByAggregateTypes(params)
+    let backendStream = eventsStreamFromBackendEmitter(backendResults)
 
-    // Build observables
-    let endOfPastEvents = Rx.Observable.fromEvent(backendResults, 'end').take(1)
-    let pastEvents = Rx.Observable.fromEvent(backendResults, 'event').takeUntil(endOfPastEvents)
-    let liveEvents = store.eventsStream
-                      .filter(({aggregateIdentity}) => !!~aggregateTypes.indexOf(aggregateIdentity.type))
-    let allEvents = pastEvents.concat(liveEvents)
+    // Filter on store.eventsStream
+    let liveStream = store.eventsStream
+      .filter(({id, aggregateIdentity}) =>
+        !!~aggregateTypes.indexOf(aggregateIdentity.type) &&
+        id > fromEventId
+      )
 
-    // Stream to client
-    let streamedEventsIds = []
-    let subscription = allEvents.subscribe(evt => {
-      if (~streamedEventsIds.indexOf(evt.id)) return
-      streamedEventsIds.push(evt.id)
-      call.write(evt)
-      setTimeout(() => pull(streamedEventsIds, evt.id), 1000)
-    })
+    // Cache live events until backendStream ends
+    let replay = new Rx.ReplaySubject()
+    let cachedLiveStream = liveStream.multicast(replay)
+    let cachedLiveStreamSubscription = cachedLiveStream.connect()
+    function _endCachedLiveStream () {
+      cachedLiveStreamSubscription.unsubscribe()
+      replay.complete()
+      // release memory
+      process.nextTick(() => replay._events.splice(0))
+    }
+    backendStream.toPromise().then(_endCachedLiveStream, _endCachedLiveStream)
+
+    // Concat the streams and subscribe
+    let eventsStream = backendStream.concat(cachedLiveStream, liveStream)
+    let eventsStreamSubscription = eventsStream.subscribe(
+      evt => call.write(evt),
+      err => call.emit('error', err)
+    )
 
     call.on('end', () => {
-      subscription.unsubscribe()
+      eventsStreamSubscription.unsubscribe()
       call.end()
     })
   }
