@@ -78,23 +78,3 @@ export {
   eventsStreamFromBus,
   eventsStreamFromBackendEmitter
 }
-
-// var subject = new Rx.Subject()
-// var rpSubject = new Rx.ReplaySubject()
-// var evt = Rx.Observable.interval(1000).map(function (_, i) { return i })
-// var live = Rx.Observable.interval(1000).map(function (_, i) { return (i + 1) * 100 }).multicast(subject)
-// live.connect()
-// var rpSubscripion = live.subscribe(rpSubject)
-//
-// var err = Rx.Observable.timer(15000).flatMap(function () { return Rx.Observable.throw(new Error()) })
-// var end = Rx.Observable.timer(10000).map(function () { return 'end' })
-//
-// var back = evt.merge(err).takeUntil(end)
-// var final = back.concat(rpSubject)
-// // var final = back.forkJoin(live.map(function (x) { return x }))
-//
-// final.subscribe(
-//   function (a) { console.log(a) },
-//   function (e) { console.log('errore') },
-//   function () { console.log('finito!!!') }
-// )
