@@ -6,6 +6,8 @@ service EventStore {
   // Ping
   rpc Ping (EmptyDTO) returns (EmptyDTO);
 
+  // Get a uuid
+  rpc GetUuid (EmptyDTO) returns (UuidResponse);
 
   /////////////////////////////////
   // QUERIES TO THE ENTIRE STORE //
@@ -77,6 +79,10 @@ service EventStore {
 }
 
 message EmptyDTO {}
+
+message UuidResponse {
+  string uuid = 1;
+}
 
 message Event {
   string type = 1;

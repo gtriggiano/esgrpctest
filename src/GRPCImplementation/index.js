@@ -1,4 +1,5 @@
 import Ping from './Ping'
+import GetUuid from './GetUuid'
 
 // Aggregates Queries
 import GetLastAggregateSnaphot from './aggregatesQueries/GetLastAggregateSnaphot'
@@ -29,6 +30,7 @@ function GRPCImplementationFactory ({backend, store}) {
   let interfaces = {backend, store}
   return {
     ping: Ping(interfaces),
+    GetUuid: GetUuid(interfaces),
 
     // Aggregates Queries
     getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
