@@ -38,6 +38,8 @@ function getEventsByAggregateTypesFactory (getConnection) {
         release()
       })
     })
+
+    return results
   }
 }
 

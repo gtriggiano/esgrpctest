@@ -39,6 +39,8 @@ function getEventsByTypesFactory (getConnection) {
         release()
       })
     })
+
+    return results
   }
 }
 
