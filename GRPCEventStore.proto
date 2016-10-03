@@ -158,5 +158,5 @@ message WriteToAggregateStreamRequest {
 }
 
 message WriteToMultipleAggregateStreamRequest {
-  repeated WriteToAggregateStreamRequest writingRequests = 1;
+  repeated WriteToAggregateStreamRequest writeRequests = 1;
 }
