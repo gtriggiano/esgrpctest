@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package grpceventstore;
+
+service EventStore {
+  // Ping
+  rpc Ping (EmptyDTO) returns (EmptyDTO);
+
+
+  /////////////////////////////////
+  // QUERIES TO THE ENTIRE STORE //
+  /////////////////////////////////
+
+  // Returns a live stream of events emitted as soon as they are stored.
+  rpc SubscribeToStoreStream (EmptyDTO) returns (stream StoredEvent);
+  // Returns a live stream of all the events stored after a certain one.
+  // The server implementation should transparently switch to live events as soon as the old ones are sent.
+  rpc SubscribeToStoreStreamFromEvent (BoundedStoreStreamRequest) returns (stream StoredEvent);
+  // Returns an ending stream of events stored after a certain one, up to the moment of request.
+  // Clients can specify a `limit` to receive just N events.
+  rpc ReadStoreStreamForwardFromEvent (BoundedStoreStreamRequest) returns (stream StoredEvent);
+
+
+  /////////////////////////////
+  // QUERIES TO AN AGGREGATE //
+  /////////////////////////////
+
+  // Returns a live stream of events belonging to an aggregate stream, emitted as soon as they are stored.
+  rpc SubscribeToAggregateStream (AggregateIdentity) returns (stream StoredEvent);
+  // Returns a live stream of all events belonging to an aggregate stream and having a version number > than the provided one.
+  // The server implementation should transparently switch to live events as soon as the old ones are sent.
+  rpc SubscribeToAggregateStreamFromVersion (BoundedAggregateStreamRequest) returns (stream StoredEvent);
+  // Returns an ending stream of all the events belonging to an aggregate, having a version number > than the provided one and stored before the time of request.
+  // Clients can specify a `limit` to receive just N events.
+  rpc ReadAggregateStreamForwardFromVersion (BoundedAggregateStreamRequest) returns (stream StoredEvent);
+  // Returns the last snapshot of an aggregate.
+  rpc GetLastAggregateSnaphot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
+
+
+
+  ////////////////////////////////
+  // QUERIES BY AGGREGATE TYPES //
+  ////////////////////////////////
+
+  // Returns a live stream of events belonging to the streams of aggregates of given types, emitted as soon as they are stored.
+  rpc SubscribeToAggregateTypesStream (AggregateTypesStreamRequest) returns (stream StoredEvent);
+  // Returns a live stream of events belonging to the streams of aggregates of given types and stored after a given event.
+  // The server implementation should transparently switch to live events as soon as the old ones are sent.
+  rpc SubscribeToAggregateTypesStreamFromEvent (BoundedAggregateTypesStreamRequest) returns (stream StoredEvent);
+  // Returns an ending stream of the events belonging to the streams of aggregates of given types, stored after a given event and before the time of request.
+  // Clients can specify a `limit` to receive just N events.
+  rpc ReadAggregateTypesStreamForwardFromEvent (BoundedAggregateTypesStreamRequest) returns (stream StoredEvent);
+
+
+  ////////////////////////////
+  // QUERIES BY EVENT TYPES //
+  ////////////////////////////
+
+  // Returns a live stream of events of certain types, emitted as soon as they are stored.
+  rpc SubscribeToEventTypesStream (EventTypesStreamRequest) returns (stream StoredEvent);
+  // Returns a live stream of events of certain types, stored after a given event.
+  // The server implementation should transparently switch to live events as soon as the old ones are sent.
+  rpc SubscribeToEventTypesStreamFromEvent (BoundedEventTypesStreamRequest) returns (stream StoredEvent);
+  // Returns an ending stream of all the events of certain types stored after a given event and before the time of request.
+  // Clients can specify a `limit` to receive just N events.
+  rpc ReadEventTypesStreamForwardFromEvent (BoundedEventTypesStreamRequest) returns (stream StoredEvent);
+
+
+  //////////////////////
+  // WRITE PROCEDURES //
+  //////////////////////
+
+  // Attempts to write a list of events into an aggregate stream
+  rpc WriteToAggregateStream (WriteToAggregateStreamRequest) returns (EmptyDTO);
+  // Attempts to write N list of events into N aggregate streams
+  rpc WriteToMultipleAggregateStream (WriteToMultipleAggregateStreamRequest) returns (EmptyDTO);
+}
+
+message EmptyDTO {}
+
+message Event {
+  string type = 1;
+  string data = 2;
+  string metadata = 3;
+}
+
+message StoredEvent {
+  int64 id = 1;
+  string type = 2;
+  AggregateIdentity aggregateIdentity = 3;
+  string storedOn = 4;
+  int32 sequenceNumber = 5;
+  string data = 6;
+  string metadata = 7;
+  string transactionId = 8;
+}
+
+message AggregateSnapshot {
+  AggregateIdentity aggregateIdentity = 1;
+  int32 version = 2;
+  string data = 3;
+}
+
+message LastAggregateSnapshotResponse {
+  oneof voidOrSnapshot {
+    EmptyDTO notFound = 1;
+    AggregateSnapshot snapshot = 2;
+  }
+}
+
+message AggregateIdentity {
+  string uuid = 1;
+  string type = 2;
+}
+
+message BoundedStoreStreamRequest {
+  int64 fromEventId = 1;
+  int32 limit = 2;
+}
+
+message BoundedAggregateStreamRequest {
+  AggregateIdentity aggregateIdentity = 1;
+  int32 fromVersion = 2;
+  int32 limit = 3;
+}
+
+message AggregateTypesStreamRequest {
+  repeated string aggregateTypes = 1;
+}
+
+message BoundedAggregateTypesStreamRequest {
+  repeated string aggregateTypes = 1;
+  int64 fromEventId = 2;
+  int32 limit = 3;
+}
+
+message EventTypesStreamRequest {
+  repeated string eventTypes = 1;
+}
+
+message BoundedEventTypesStreamRequest {
+  repeated string eventTypes = 1;
+  int64 fromEventId = 2;
+  int32 limit = 3;
+}
+
+message WriteToAggregateStreamRequest {
+  AggregateIdentity aggregateIdentity = 1;
+  sint32 expectedAggregateVersion = 2;
+  repeated Event events = 3;
+  string snapshot = 4;
+}
+
+message WriteToMultipleAggregateStreamRequest {
+  repeated WriteToAggregateStreamRequest writingRequests = 1;
+}

@@ -2,7 +2,7 @@ import grpc from 'grpc'
 import { assign } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
-const PROTOCOL_FILE_PATH = `${__dirname}/../gRPCEventStore.proto`
+const PROTOCOL_FILE_PATH = `${__dirname}/../GRPCEventStore.proto`
 const EventStoreProtocol = grpc.load(PROTOCOL_FILE_PATH).gRPCEventStore
 
 import GRPCImplementation from './GRPCImplementation'
@@ -27,7 +27,7 @@ function GRPCInterface (_settings) {
   let _connecting = false
   let _disconnecting = false
   let _grpcServer = new grpc.Server()
-  _grpcServer.addProtoService(EventStoreProtocol.Api.service, GRPCImplementation({backend, store}))
+  _grpcServer.addProtoService(EventStoreProtocol.EventStore.service, GRPCImplementation({backend, store}))
 
   // Public API
   function connect () {
