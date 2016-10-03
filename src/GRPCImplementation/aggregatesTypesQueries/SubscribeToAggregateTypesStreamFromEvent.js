@@ -45,6 +45,7 @@ function SubscribeToAggregateTypesStreamFromEvent ({backend, store}) {
     )
 
     call.on('end', () => {
+      _endCachedLiveStream()
       eventsStreamSubscription.unsubscribe()
       call.end()
     })
