@@ -1,7 +1,7 @@
-import uuid from 'uuid'
+import shortid from 'shortid'
 
 function GetUuid () {
-  return (_, callback) => callback(null, uuid.v4())
+  return (_, callback) => callback(null, shortid())
 }
 
 export default GetUuid

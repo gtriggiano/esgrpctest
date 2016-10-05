@@ -1,21 +1,34 @@
-import uuid from 'uuid'
+import shortid from 'shortid'
 import { every, min } from 'lodash'
 
 import { isValidString, prefixString } from '../../utils'
 
 function WriteToAggregateStream ({backend, store}) {
   return (call, callback) => {
-    let params = [validateRequestAndGetBackendParams(call.request)]
-    let transactionId = uuid.v4()
-    backend.storeEvents(params, transactionId, (err, storedEvents) => {
-      if (err) return call.emit('error', err)
+    let writeRequests
+    try {
+      writeRequests = [validateAndGetBackendWriteRequest(call.request)]
+    } catch (e) {
+      return call.emit('error', e)
+    }
+
+    let transactionId = shortid()
+
+    let backendResults = backend.storeEvents({writeRequests, transactionId})
+
+    backendResults.on('error', err => {
+      backendResults.removeAllListeners()
+      call.emit('error', err)
+    })
+    backendResults.on('storedEvents', storedEvents => {
+      backendResults.removeAllListeners()
       store.publishEvents(storedEvents)
       callback(null, storedEvents)
     })
   }
 }
 
-function validateRequestAndGetBackendParams (request, requestIndex) {
+function validateAndGetBackendWriteRequest (request, requestIndex) {
   let eMgs = prefixString(requestIndex !== undefined ? `[writing request ${requestIndex}]` : '')
 
   let { aggregateIdentity, expectedAggregateVersion, events, snapshot } = request
@@ -40,5 +53,5 @@ function validateRequestAndGetBackendParams (request, requestIndex) {
 
 export default WriteToAggregateStream
 export {
-  validateRequestAndGetBackendParams
+  validateAndGetBackendWriteRequest
 }

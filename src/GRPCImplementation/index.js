@@ -30,7 +30,7 @@ function GRPCImplementationFactory ({backend, store}) {
   let interfaces = {backend, store}
   return {
     ping: Ping(interfaces),
-    GetUuid: GetUuid(interfaces),
+    getUuid: GetUuid(interfaces),
 
     // Aggregates Queries
     getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
