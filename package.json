@@ -16,14 +16,15 @@
     "i:transpile": "babel src -d lib"
   },
   "dependencies": {
+    "bluebird": "^3.4.6",
     "debug": "^2.2.0",
     "dnsmq-messagebus": "0.0.2",
     "eventemitter3": "^2.0.0",
     "grpc": "^1.0.0",
     "lodash": "^4.16.1",
-    "ramda": "^0.22.1",
+    "pg": "^6.1.0",
     "rxjs": "^5.0.0-beta.12",
-    "uuid": "^2.0.3"
+    "shortid": "^2.2.6"
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
