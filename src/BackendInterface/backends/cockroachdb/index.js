@@ -17,10 +17,10 @@ function CockroachDBBackend (_settings) {
   function setup (done) {
     getConnection((err, {client, release}) => {
       if (err) return done(err)
-      setupDatabase(client, (err) => {
-        done(err)
-        release()
-      })
+      setupDatabase(client)
+        .then(() => done())
+        .catch(err => done(err))
+        .then(() => release())
     })
   }
 

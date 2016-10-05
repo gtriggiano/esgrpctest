@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS aggregates (
   uuid STRING(256) UNIQUE NOT NULL,
   type STRING(256) NOT NULL,
   version INT NOT NULL CHECK (version >= -1),
+
   PRIMARY KEY (uuid, type),
   INDEX by_type_idx (type)
 );
@@ -30,6 +31,7 @@ CREATE TABLE IF NOT EXISTS snapshots (
   aggregateType STRING(256) NOT NULL,
   version INT CHECK (version >= 0),
   data BYTES NOT NULL,
+
   PRIMARY KEY (aggregateUuid, aggregateType, version),
   FOREIGN KEY (aggregateUuid, aggregateType) REFERENCES aggregates (uuid, type)
 );

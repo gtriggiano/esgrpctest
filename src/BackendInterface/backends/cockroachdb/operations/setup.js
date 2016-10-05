@@ -1,10 +1,18 @@
 import fs from 'fs'
+import Promise from 'bluebird'
 
 let setupSQLFile = `${__dirname}/setup.sql`
 
-function setupDatabase (client, done) {
-  let setupQuery = fs.readFileSync(setupSQLFile)
-  client.query(setupQuery, err => done(err))
+function setupDatabase (client) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(setupSQLFile, (err, setupQuery) => {
+      if (err) return reject(err)
+      client.query(setupQuery, err => {
+        if (err) return reject(err)
+        resolve()
+      })
+    })
+  })
 }
 
 export default setupDatabase
