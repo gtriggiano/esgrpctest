@@ -2,6 +2,8 @@ import { range, random } from 'lodash'
 import should from 'should/as-function'
 import sinon from 'sinon'
 import Rx from 'rxjs'
+import EventEmitter from 'eventemitter3'
+import shortid from 'shortid'
 
 import FixtureBusNode from '../tests/FixtureBusNode'
 
@@ -118,7 +120,7 @@ describe('Utilities', () => {
       let stream = eventsStreamFromBus(FixtureBusNode())
       should(stream).be.an.instanceof(Rx.ConnectableObservable)
     })
-    it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `bus`', function (done) {
+    it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `busNode`', function (done) {
       let delayTime = random(120, 160)
       let testBusNode = FixtureBusNode()
       let testStream = eventsStreamFromBus(testBusNode, delayTime)
@@ -167,6 +169,73 @@ describe('Utilities', () => {
     })
   })
   describe('eventsStreamFromBackendEmitter(backendEmitter)', () => {
-    it('should be tested')
+    it('should be a function', () => should(eventsStreamFromBackendEmitter).be.a.Function())
+    it('should return an instance of Rx.Observable', () => {
+      let backendEmitter = new EventEmitter()
+      let stream = eventsStreamFromBackendEmitter(backendEmitter)
+      should(stream).be.an.instanceof(Rx.Observable)
+    })
+    it('should dispatch `event` events of `backendEmitter`', (done) => {
+      let backendEmitter = new EventEmitter()
+      let stream = eventsStreamFromBackendEmitter(backendEmitter)
+
+      let testEvents = range(random(1, 5)).map(() => shortid())
+      let eventToEmit = 0
+      let dispatchedEvents = []
+
+      let subscription = stream.subscribe(
+        (evt) => dispatchedEvents.push(evt),
+        (err) => done(err)
+      )
+
+      let intval = setInterval(function () {
+        let e = testEvents[eventToEmit]
+        if (!e) {
+          clearInterval(intval)
+          subscription.unsubscribe()
+          should(dispatchedEvents).containDeepOrdered(testEvents)
+          done()
+          return
+        }
+        backendEmitter.emit('event', e)
+        eventToEmit++
+      }, 10)
+    })
+    it('eventsStream should end with an error if `backendEmitter` emits an error event', (done) => {
+      let backendEmitter = new EventEmitter()
+      let stream = eventsStreamFromBackendEmitter(backendEmitter)
+      let dispatchedError = false
+
+      let subscription = stream.subscribe(
+        (evt) => done(new Error('should not dispatch enything')),
+        (err) => {
+          dispatchedError = true
+          should(err.message).equal('testMessage')
+        },
+        () => done(new Error('complete handler should not be executed'))
+      )
+
+      setTimeout(function () {
+        backendEmitter.emit('error', new Error('testMessage'))
+        should(subscription.closed).be.True()
+        should(dispatchedError).be.True()
+        done()
+      }, 20)
+    })
+    it('eventsStream should end if `backendEmitter` emits an end event', (done) => {
+      let backendEmitter = new EventEmitter()
+      let stream = eventsStreamFromBackendEmitter(backendEmitter)
+
+      let subscription = stream.subscribe(
+        (evt) => done(new Error('should not dispatch enything')),
+        () => done(new Error('error handler should not be executed'))
+      )
+
+      setTimeout(function () {
+        backendEmitter.emit('end')
+        should(subscription.closed).be.True()
+        done()
+      }, 20)
+    })
   })
 })
