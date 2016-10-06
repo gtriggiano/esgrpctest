@@ -29,8 +29,7 @@ const zeropad = (i, minLength) => {
   return str
 }
 
-const eventsStreamFromBus = (bus, delayTime) => {
-  delayTime = delayTime || 100
+const eventsStreamFromBus = (bus, delayTime = 100) => {
   let receivedEvents = {
     ids: [],
     byId: {}
