@@ -3,15 +3,32 @@ import EventEmitter from 'eventemitter3'
 
 import { eventsStreamFromBus } from '../src/utils'
 
-function FixtureGRPCHandlersInterfaces ({fixtureMessageBus} = {}) {
+function FixtureGRPCHandlersInterfaces ({fixtureMessageBus, storedEvents} = {}) {
   return {
-    backend: FixtureGRPCBackend(),
+    backend: FixtureGRPCBackend(storedEvents),
     store: FixtureGRPCStore(fixtureMessageBus)
   }
 }
 
-function FixtureGRPCBackend () {
-
+function FixtureGRPCBackend (storedEvents) {
+  return {
+    getEventsByAggregate: backendFetchingApi(storedEvents)
+  }
+}
+function backendFetchingApi (storedEvents = []) {
+  return sinon.spy(() => {
+    let ee = new EventEmitter()
+    storedEvents.forEach((evt, idx) => {
+      let i = idx
+      setTimeout(() => {
+        ee.emit('event', storedEvents[i])
+      }, (idx + 1) * 10)
+    })
+    setTimeout(() => {
+      ee.emit('end')
+    }, (storedEvents.length + 1) * 10)
+    return ee
+  })
 }
 
 function FixtureGRPCStore (fixtureMessageBus) {
