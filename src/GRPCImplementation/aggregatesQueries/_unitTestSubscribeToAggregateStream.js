@@ -7,7 +7,7 @@ import FixtureGRPCHandlersParameters from '../../../tests/FixtureGRPCHandlersPar
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateStream(call)', () => {
-  it('call should emit `error` if call.request is not a valid aggregateIdentity', () => {
+  it('should emit `error` on call if call.request is not a valid aggregateIdentity', () => {
     let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces())
 
     // Bad aggregateIdentity.id
@@ -30,29 +30,28 @@ describe('.subscribeToAggregateStream(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should write to call stream every event about aggregate', (done) => {
+  it('should call.write() every live event about aggregate', (done) => {
+    let aggregateIdentity = {id: 'uid', type: 'Test'}
     let fixtureMessageBus = new EventEmitter()
     let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces({fixtureMessageBus}))
 
     let call = FixtureGRPCHandlersParameters().call
     call.request = {id: 'uid', type: 'Test'}
     implementation.subscribeToAggregateStream(call)
-
     fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-      {id: 3, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''},
-      {id: 2, aggregateIdentity: {id: 'uid-a', type: 'Another'}, data: ''},
-      {id: 1, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''}
+      {id: 3, aggregateIdentity},
+      {id: 2, aggregateIdentity: {id: 'other', type: 'other'}},
+      {id: 1, aggregateIdentity}
     ]))
-
     setTimeout(function () {
-      let calls = call.write.getCalls()
-      should(calls.length).equal(2)
-      should(calls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([1, 3])
+      let writeCalls = call.write.getCalls()
+      should(writeCalls.length).equal(2)
+      should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([1, 3])
       call.emit('end')
       done()
     }, 500)
   })
-  it('should stop writing to call stream if client ends subscription', (done) => {
+  it('should stop call.write()-ing if client ends subscription', (done) => {
     let fixtureMessageBus = new EventEmitter()
     let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces({fixtureMessageBus}))
 
