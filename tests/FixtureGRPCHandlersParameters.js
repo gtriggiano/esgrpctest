@@ -1,10 +1,15 @@
 import sinon from 'sinon'
+import EventEmitter from 'eventemitter3'
 
 function FixtureCall () {
-  return {
-    write: sinon.spy(),
-    emit: sinon.spy()
-  }
+  let call = new EventEmitter()
+  sinon.spy(call, 'on')
+  sinon.spy(call, 'emit')
+  sinon.spy(call, 'removeAllListeners')
+  call.write = sinon.spy()
+  call.end = sinon.spy()
+
+  return call
 }
 
 function FixtureGRPCHandlersParameters () {
