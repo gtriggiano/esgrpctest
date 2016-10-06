@@ -7,7 +7,7 @@ service EventStore {
   rpc Ping (EmptyDTO) returns (EmptyDTO);
 
   // Get a uuid
-  rpc GetUuid (EmptyDTO) returns (UuidResponse);
+  rpc GetUid (EmptyDTO) returns (UidResponse);
 
   /////////////////////////////////
   // QUERIES TO THE ENTIRE STORE //
@@ -80,8 +80,8 @@ service EventStore {
 
 message EmptyDTO {}
 
-message UuidResponse {
-  string uuid = 1;
+message UidResponse {
+  string uid = 1;
 }
 
 message Event {
@@ -115,7 +115,7 @@ message LastAggregateSnapshotResponse {
 }
 
 message AggregateIdentity {
-  string uuid = 1;
+  string id = 1;
   string type = 2;
 }
 
