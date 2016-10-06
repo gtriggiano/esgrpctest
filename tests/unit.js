@@ -17,5 +17,6 @@ describe('gRPC Event Store Package Unit Tests', function () {
   require('../src/_unitTestBackendInterface')
   require('../src/_unitTestStoreInterface')
   require('../src/_unitTestGRPCInterface')
+  require('../src/_unitTestGRPCImplementation')
   require('../src/_unitTestServiceNode')
 })
