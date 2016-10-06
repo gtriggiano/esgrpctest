@@ -2,11 +2,11 @@ import Promise from 'bluebird'
 
 export default function createAggregateSnapshot (client, aggregateIdentity, version, data) {
   return new Promise((resolve, reject) => {
-    let {uuid, type} = aggregateIdentity
+    let {id, type} = aggregateIdentity
     let insertQueryString = `
       INSERT INTO snapshots
         (
-          aggregateUuid,
+          aggregateId,
           aggregateType,
           version,
           data
@@ -15,7 +15,7 @@ export default function createAggregateSnapshot (client, aggregateIdentity, vers
 
     client.query(
       insertQueryString,
-      [uuid, type, version, data],
+      [id, type, version, data],
       (err) => {
         if (err) return reject(err)
         resolve()

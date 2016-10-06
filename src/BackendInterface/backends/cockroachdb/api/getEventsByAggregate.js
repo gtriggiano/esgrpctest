@@ -5,12 +5,12 @@ import toDTO from '../helpers/eventRecordToDTO'
 function getEventsByAggregateFactory (getConnection) {
   return ({aggregateIdentity, fromVersion, limit}) => {
     let queryStr = `SELECT * FROM events
-                    WHERE aggregateUuid = $1
+                    WHERE aggregateId = $1
                       AND aggregateType = $2
                       AND sequenceNumber > $3
                     ORDER BY id `
     let queryParams = [
-      aggregateIdentity.uuid,
+      aggregateIdentity.id,
       aggregateIdentity.type,
       fromVersion
     ]

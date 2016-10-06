@@ -8,10 +8,10 @@ function SubscribeToAggregateStreamFromVersion ({backend, store}) {
 
     // Validate request
     if (!aggregateIdentity) return call.emit('error', new TypeError('aggregateIdentity cannot be undefined'))
-    if (!isValidString(aggregateIdentity.uuid)) return call.emit('error', new TypeError('aggregateIdentity.uuid should be a non empty string'))
+    if (!isValidString(aggregateIdentity.id)) return call.emit('error', new TypeError('aggregateIdentity.id should be a non empty string'))
     if (!isValidString(aggregateIdentity.type)) return call.emit('error', new TypeError('aggregateIdentity.type should be a non empty string'))
 
-    let { uuid, type } = aggregateIdentity
+    let { id, type } = aggregateIdentity
     fromVersion = fromVersion >= -1 ? fromVersion : -1
 
     // Call backend
@@ -22,7 +22,7 @@ function SubscribeToAggregateStreamFromVersion ({backend, store}) {
     // Filter on store.eventsStream
     let liveStream = store.eventsStream
       .filter(({aggregateIdentity, sequenceNumber}) =>
-        aggregateIdentity.uuid === uuid &&
+        aggregateIdentity.id === id &&
         aggregateIdentity.type === type &&
         sequenceNumber > fromVersion
       )

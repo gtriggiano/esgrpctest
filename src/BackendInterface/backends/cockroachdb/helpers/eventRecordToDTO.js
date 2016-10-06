@@ -2,7 +2,7 @@ function eventRecordToDTO (record) {
   let {
     id,
     type,
-    aggregateUuid,
+    aggregateId,
     aggregateType,
     storedOn,
     sequenceNumber,
@@ -15,7 +15,7 @@ function eventRecordToDTO (record) {
     id: parseInt(id, 10),
     type,
     aggregateIdentity: {
-      uuid: aggregateUuid,
+      id: aggregateId,
       type: aggregateType
     },
     storedOn,

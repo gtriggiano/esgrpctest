@@ -5,12 +5,12 @@ function getLastSnapshotOfAggregateFactory (getConnection) {
     let results = new EventEmitter()
 
     let queryString = `SELECT * FROM snapshots
-                    WHERE aggregateUuid = $1
+                    WHERE aggregateId = $1
                       AND aggregateType = $2
                     ORDER BY version DESC
                     LIMIT 1`
     let queryParams = [
-      aggregateIdentity.uuid,
+      aggregateIdentity.id,
       aggregateIdentity.type
     ]
 

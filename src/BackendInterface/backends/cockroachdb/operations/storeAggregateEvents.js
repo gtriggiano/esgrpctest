@@ -7,7 +7,7 @@ export default function storeAggregateEvents (client, aggregate, events, transac
   return new Promise((resolve, reject) => {
     let parametersList = events.map(({type, data, metadata}, idx) => ([
       type,
-      aggregate.uuid,
+      aggregate.id,
       aggregate.type,
       aggregate.version + idx + 1,
       new Buffer(data, 'utf8'),
@@ -28,7 +28,7 @@ export default function storeAggregateEvents (client, aggregate, events, transac
       INSERT INTO events
         (
           type,
-          aggregateUuid,
+          aggregateId,
           aggregateType,
           sequenceNumber,
           data,

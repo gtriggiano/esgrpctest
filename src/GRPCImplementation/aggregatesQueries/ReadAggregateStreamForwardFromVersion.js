@@ -6,7 +6,7 @@ function ReadAggregateStreamForwardFromVersion ({backend}) {
 
     // Validate request
     if (!aggregateIdentity) return call.emit('error', new TypeError('aggregateIdentity cannot be undefined'))
-    if (!isValidString(aggregateIdentity.uuid)) return call.emit('error', new TypeError('aggregateIdentity.uuid should be a non empty string'))
+    if (!isValidString(aggregateIdentity.id)) return call.emit('error', new TypeError('aggregateIdentity.id should be a non empty string'))
     if (!isValidString(aggregateIdentity.type)) return call.emit('error', new TypeError('aggregateIdentity.type should be a non empty string'))
 
     fromVersion = fromVersion >= -1 ? fromVersion : -1

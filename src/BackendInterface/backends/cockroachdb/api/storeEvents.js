@@ -48,7 +48,7 @@ function storeEventsFactory (getConnection) {
 function writeToAggregateStream (client, request, transactionId) {
   let { aggregateIdentity, events, expectedAggregateVersion, snapshot } = request
 
-  let eMsg = prefixString(`[${aggregateIdentity.type}@${aggregateIdentity.uuid}] `)
+  let eMsg = prefixString(`[${aggregateIdentity.type}@${aggregateIdentity.id}] `)
 
   let consistentVersioningRequired = expectedAggregateVersion >= 0
 
