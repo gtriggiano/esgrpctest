@@ -36,7 +36,7 @@ function FixtureBackend ({aggregates, events, snapshots, store}) {
   function dispatchEvents (results, events) {
     events.forEach((evt, idx) => setTimeout(() => {
       results.emit('event', evt.toJS())
-    }, idx + 1))
+    }, idx + 5))
     setTimeout(function () {
       results.emit('end')
     }, events.size + 5)
@@ -44,10 +44,10 @@ function FixtureBackend ({aggregates, events, snapshots, store}) {
   function dispatchSnapshot (results, snapshot) {
     setTimeout(() => {
       results.emit('snapshot', snapshot.toJS())
-    }, 1)
+    }, 5)
     setTimeout(function () {
       results.emit('end')
-    }, 2)
+    }, 10)
   }
 
   return {
