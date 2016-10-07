@@ -16,6 +16,7 @@ describe('GRPCImplementation({backend, store})', () => {
   })
   require('./GRPCImplementation/_unitTestPing')
   require('./GRPCImplementation/_unitTestGetUid')
+  require('./GRPCImplementation/aggregatesQueries/_unitTestReadAggregateStreamForwardFromVersion')
   require('./GRPCImplementation/aggregatesQueries/_unitTestSubscribeToAggregateStream')
   require('./GRPCImplementation/aggregatesQueries/_unitTestSubscribeToAggregateStreamFromVersion')
 })

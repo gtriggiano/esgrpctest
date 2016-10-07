@@ -9,7 +9,7 @@ function ReadAggregateStreamForwardFromVersion ({backend}) {
     if (!isValidString(aggregateIdentity.id)) return call.emit('error', new TypeError('aggregateIdentity.id should be a non empty string'))
     if (!isValidString(aggregateIdentity.type)) return call.emit('error', new TypeError('aggregateIdentity.type should be a non empty string'))
 
-    fromVersion = fromVersion >= -1 ? fromVersion : -1
+    fromVersion = fromVersion >= 0 ? fromVersion : 0
 
     let params = {aggregateIdentity, fromVersion}
     if (limit > 0) params.limit = limit

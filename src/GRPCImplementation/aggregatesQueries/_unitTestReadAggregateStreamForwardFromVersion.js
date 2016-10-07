@@ -5,13 +5,15 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 
 import GRPCImplementation from '..'
 
-describe('.subscribeToAggregateStreamFromVersion(call)', () => {
+describe('.readAggregateStreamForwardFromVersion(call)', () => {
   it('call should emit `error` if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
     // No aggregateIdentity
-    simulation.call.request = {}
+    simulation.call.request = {
+      fromVersion: 0
+    }
     implementation.subscribeToAggregateStream(simulation.call)
     let emitArgs = simulation.call.emit.firstCall.args
 
@@ -21,7 +23,10 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
 
     // Bad aggregateIdentity.id
     simulation = InMemorySimulation(data)
-    simulation.call.request = {aggregateIdentity: {id: '', type: 'test'}}
+    simulation.call.request = {
+      aggregateIdentity: {id: '', type: 'test'},
+      fromVersion: 0
+    }
     implementation.subscribeToAggregateStream(simulation.call)
     emitArgs = simulation.call.emit.firstCall.args
 
@@ -31,7 +36,10 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
 
     // Bad aggregateIdentity.type
     simulation = InMemorySimulation(data)
-    simulation.call.request = {aggregateIdentity: {id: 'test', type: ''}}
+    simulation.call.request = {
+      aggregateIdentity: {id: 'test', type: ''},
+      fromVersion: 0
+    }
     implementation.subscribeToAggregateStream(simulation.call)
     emitArgs = simulation.call.emit.firstCall.args
 
@@ -48,14 +56,14 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
       fromVersion: random(-10, 10)
     }
 
-    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
 
     let calls = simulation.backend.getEventsByAggregate.getCalls()
     should(calls.length === 1).be.True()
     should(calls[0].args[0].aggregateIdentity).containEql(simulation.call.request.aggregateIdentity)
     should(calls[0].args[0].fromVersion).equal(max([0, simulation.call.request.fromVersion]))
   })
-  it('should call.write() the right sequence of fetched and live events about aggregate', (done) => {
+  it('should call.write() the right sequence of fetched events about aggregate', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
@@ -72,55 +80,68 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
       fromVersion: minVersion
     }
 
-    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
 
-    let nextAggregateVersion = testAggregate.get('version') + 1
-    simulation.store.publishEvents([
-      {id: 100010, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
-      {id: 100011, aggregateIdentity: {id: 'other', type: 'other'}},
-      {id: 100012, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
-      {id: 100013, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
-      {id: 100014, aggregateIdentity: {id: 'other', type: 'other'}},
-      {id: 100015, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++}
-    ])
     setTimeout(() => {
       let writeCalls = simulation.call.write.getCalls()
-      should(writeCalls.length).equal(storedEvents.size + 4)
+      should(writeCalls.length).equal(storedEvents.size)
       should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered(
-        storedEvents.toJS().map(({id}) => id).concat([100010, 100012, 100013, 100015])
+        storedEvents.toJS().map(({id}) => id)
       )
-      simulation.call.emit('end')
       done()
-    }, 300)
+    }, 200)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('call should .end() after all the stored events are written', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
+    let storedEvents = data.events.filter(evt =>
+      evt.get('aggregateId') === testAggregate.get('id') &&
+      evt.get('aggregateType') === testAggregate.get('type')
+    )
+    let minVersion = random(1, storedEvents.size)
+    storedEvents = storedEvents.filter(evt => evt.get('sequenceNumber') > minVersion)
+
     let implementation = GRPCImplementation(simulation)
 
     simulation.call.request = {
       aggregateIdentity: pick(testAggregate.toJS(), ['id', 'type']),
-      fromVersion: 1
+      fromVersion: minVersion
     }
 
-    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
 
-    simulation.store.publishEvents([
-      {id: 100010, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''},
-      {id: 100011, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''}
-    ])
+    setTimeout(() => {
+      let writeCalls = simulation.call.write.getCalls()
+      should(writeCalls.length).equal(storedEvents.size)
+      should(simulation.call.end.calledOnce).be.True()
+      done()
+    }, 200)
+  })
+  it('should stop call.write()-ing if client ends subscription', (done) => {
+    let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
+    let simulation = InMemorySimulation(data)
+    let storedEvents = data.events.filter(evt =>
+      evt.get('aggregateId') === testAggregate.get('id') &&
+      evt.get('aggregateType') === testAggregate.get('type')
+    )
+
+    let implementation = GRPCImplementation(simulation)
+
+    simulation.call.request = {
+      aggregateIdentity: pick(testAggregate.toJS(), ['id', 'type']),
+      fromVersion: 0
+    }
+
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
 
     setTimeout(() => {
       simulation.call.emit('end')
-      simulation.store.publishEvents([
-        {id: 100012, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''},
-        {id: 100013, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''}
-      ])
-    }, 300)
+    }, 1)
+
     setTimeout(() => {
-      let calls = simulation.call.write.getCalls()
-      should(calls.map(({args}) => args[0] && args[0].id)).not.containDeepOrdered([100012, 100013])
+      should(simulation.call.end.calledOnce).be.True()
+      should(simulation.call.write.getCalls().map(({args}) => args[0] && args[0].id)).not.containDeepOrdered(storedEvents.takeLast(1).toJS().map(({id}) => id))
       done()
-    }, 500)
+    }, 200)
   })
 })

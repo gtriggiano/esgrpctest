@@ -12,7 +12,7 @@ function SubscribeToAggregateStreamFromVersion ({backend, store}) {
     if (!isValidString(aggregateIdentity.type)) return call.emit('error', new TypeError('aggregateIdentity.type should be a non empty string'))
 
     let { id, type } = aggregateIdentity
-    fromVersion = fromVersion >= -1 ? fromVersion : -1
+    fromVersion = fromVersion >= 0 ? fromVersion : 0
 
     // Call backend
     let params = {aggregateIdentity, fromVersion}
