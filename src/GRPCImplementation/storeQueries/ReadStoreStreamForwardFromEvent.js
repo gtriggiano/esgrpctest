@@ -7,7 +7,7 @@ function ReadStoreStreamForwardFromEvent ({backend}) {
     let params = {fromEventId}
     if (limit > 0) params.limit = limit
 
-    let backendResults = backend.getEventsByTypes(params)
+    let backendResults = backend.getEvents(params)
     let eventsStream = eventsStreamFromBackendEmitter(backendResults)
     let subscription = eventsStream.subscribe(
       evt => call.write(evt),
