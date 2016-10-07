@@ -1,100 +1,126 @@
 import should from 'should/as-function'
-import { random, max } from 'lodash'
-import EventEmitter from 'eventemitter3'
+import { random, max, pick } from 'lodash'
 
-import FixtureGRPCHandlersInterfaces from '../../../tests/FixtureGRPCHandlersInterfaces'
-import FixtureGRPCHandlersParameters from '../../../tests/FixtureGRPCHandlersParameters'
+import InMemorySimulation from '../../../tests/InMemorySimulation'
 
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateStreamFromVersion(call)', () => {
   it('call should emit `error` if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
-    let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces())
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
 
     // No aggregateIdentity
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {}
-    implementation.subscribeToAggregateStream(call)
-    let emitArgs = call.emit.firstCall.args
+    simulation.call.request = {}
+    implementation.subscribeToAggregateStream(simulation.call)
+    let emitArgs = simulation.call.emit.firstCall.args
 
-    should(call.emit.calledOnce).be.True()
+    should(simulation.call.emit.calledOnce).be.True()
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
 
     // Bad aggregateIdentity.id
-    call = FixtureGRPCHandlersParameters().call
-    call.request = {aggregateIdentity: {id: '', type: 'test'}}
-    implementation.subscribeToAggregateStream(call)
-    emitArgs = call.emit.firstCall.args
+    simulation = InMemorySimulation(data)
+    simulation.call.request = {aggregateIdentity: {id: '', type: 'test'}}
+    implementation.subscribeToAggregateStream(simulation.call)
+    emitArgs = simulation.call.emit.firstCall.args
 
-    should(call.emit.calledOnce).be.True()
+    should(simulation.call.emit.calledOnce).be.True()
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
 
     // Bad aggregateIdentity.type
-    call = FixtureGRPCHandlersParameters().call
-    call.request = {aggregateIdentity: {id: 'test', type: ''}}
-    implementation.subscribeToAggregateStream(call)
-    emitArgs = call.emit.firstCall.args
+    simulation = InMemorySimulation(data)
+    simulation.call.request = {aggregateIdentity: {id: 'test', type: ''}}
+    implementation.subscribeToAggregateStream(simulation.call)
+    emitArgs = simulation.call.emit.firstCall.args
 
-    should(call.emit.calledOnce).be.True()
+    should(simulation.call.emit.calledOnce).be.True()
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
   it('should call backend.getEventsByAggregate() with right parameters', () => {
-    let {backend, store} = FixtureGRPCHandlersInterfaces()
-    let implementation = GRPCImplementation({backend, store})
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
 
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {
+    simulation.call.request = {
       aggregateIdentity: {id: 'uid', type: 'test'},
       fromVersion: random(-10, 10)
     }
 
-    implementation.subscribeToAggregateStreamFromVersion(call)
+    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
 
-    let calls = backend.getEventsByAggregate.getCalls()
+    let calls = simulation.backend.getEventsByAggregate.getCalls()
     should(calls.length === 1).be.True()
-    should(calls[0].args[0].aggregateIdentity).containEql(call.request.aggregateIdentity)
-    should(calls[0].args[0].fromVersion).equal(max([-1, call.request.fromVersion]))
+    should(calls[0].args[0].aggregateIdentity).containEql(simulation.call.request.aggregateIdentity)
+    should(calls[0].args[0].fromVersion).equal(max([-1, simulation.call.request.fromVersion]))
   })
   it('should call.write() the right sequence of fetched and live events about aggregate', (done) => {
-    let aggregateIdentity = {id: 'id', type: 'Test'}
-    let fixtureMessageBus = new EventEmitter()
-    let storedEvents = [
-      {id: 1, aggregateIdentity, sequenceNumber: 1},
-      {id: 2, aggregateIdentity, sequenceNumber: 2}
-    ]
-    let {store, backend} = FixtureGRPCHandlersInterfaces({
-      fixtureMessageBus,
-      storedEvents
-    })
-    let implementation = GRPCImplementation({store, backend})
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {
-      aggregateIdentity,
-      fromVersion: 0
+    let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
+    let simulation = InMemorySimulation(data)
+    let storedEvents = data.events.filter(evt =>
+      evt.get('aggregateId') === testAggregate.get('id') &&
+      evt.get('aggregateType') === testAggregate.get('type')
+    )
+    let minVersion = random(1, storedEvents.size)
+    storedEvents = storedEvents.filter(evt => evt.get('sequenceNumber') > minVersion)
+
+    let implementation = GRPCImplementation(simulation)
+
+    simulation.call.request = {
+      aggregateIdentity: pick(testAggregate.toJS(), ['id', 'type']),
+      fromVersion: minVersion
     }
 
-    implementation.subscribeToAggregateStreamFromVersion(call)
-    fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-      {id: 5, aggregateIdentity, sequenceNumber: 4},
-      {id: 4, aggregateIdentity: {id: 'other', type: 'other'}},
-      {id: 3, aggregateIdentity, sequenceNumber: 3}
-    ]))
+    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
+
+    let nextAggregateVersion = testAggregate.get('version') + 1
+    simulation.store.publishEvents([
+      {id: 100010, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
+      {id: 100011, aggregateIdentity: {id: 'other', type: 'other'}},
+      {id: 100012, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
+      {id: 100013, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++},
+      {id: 100014, aggregateIdentity: {id: 'other', type: 'other'}},
+      {id: 100015, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++}
+    ])
     setTimeout(() => {
-      fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-        {id: 6, aggregateIdentity, sequenceNumber: 5},
-        {id: 7, aggregateIdentity: {id: 'other', type: 'other'}},
-        {id: 8, aggregateIdentity, sequenceNumber: 6}
-      ]))
-    }, 200)
-    setTimeout(() => {
-      let writeCalls = call.write.getCalls()
-      should(writeCalls.length).equal(6)
-      should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([1, 2, 3, 5, 6, 8])
-      call.emit('end')
+      let writeCalls = simulation.call.write.getCalls()
+      should(writeCalls.length).equal(storedEvents.size + 4)
+      should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered(
+        storedEvents.toJS().map(({id}) => id).concat([100010, 100012, 100013, 100015])
+      )
+      simulation.call.emit('end')
       done()
-    }, 350)
+    }, 300)
+  })
+  it('should stop call.write()-ing if client ends subscription', (done) => {
+    let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
+
+    simulation.call.request = {
+      aggregateIdentity: pick(testAggregate.toJS(), ['id', 'type']),
+      fromVersion: 1
+    }
+
+    implementation.subscribeToAggregateStreamFromVersion(simulation.call)
+
+    simulation.store.publishEvents([
+      {id: 100010, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''},
+      {id: 100011, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''}
+    ])
+
+    setTimeout(() => {
+      simulation.call.emit('end')
+      simulation.store.publishEvents([
+        {id: 100012, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''},
+        {id: 100013, aggregateIdentity: simulation.call.request.aggregateIdentity, data: ''}
+      ])
+    }, 300)
+    setTimeout(() => {
+      let calls = simulation.call.write.getCalls()
+      should(calls.map(({args}) => args[0] && args[0].id)).not.containDeepOrdered([100012, 100013])
+      done()
+    }, 500)
   })
 })

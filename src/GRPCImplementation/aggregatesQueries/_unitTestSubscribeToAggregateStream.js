@@ -1,80 +1,77 @@
 import should from 'should/as-function'
-import EventEmitter from 'eventemitter3'
 
-import FixtureGRPCHandlersInterfaces from '../../../tests/FixtureGRPCHandlersInterfaces'
-import FixtureGRPCHandlersParameters from '../../../tests/FixtureGRPCHandlersParameters'
+import InMemorySimulation from '../../../tests/InMemorySimulation'
 
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateStream(call)', () => {
   it('should emit `error` on call if call.request is not a valid aggregateIdentity', () => {
-    let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces())
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
 
     // Bad aggregateIdentity.id
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {id: '', type: 'test'}
-    implementation.subscribeToAggregateStream(call)
-    let emitArgs = call.emit.firstCall.args
+    simulation.call.request = {id: '', type: 'test'}
+    implementation.subscribeToAggregateStream(simulation.call)
+    let emitArgs = simulation.call.emit.firstCall.args
 
-    should(call.emit.calledOnce).be.True()
+    should(simulation.call.emit.calledOnce).be.True()
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
 
     // Bad aggregateIdentity.type
-    call = FixtureGRPCHandlersParameters().call
-    call.request = {id: 'test', type: ''}
-    implementation.subscribeToAggregateStream(call)
-    emitArgs = call.emit.firstCall.args
+    simulation = InMemorySimulation(data)
+    simulation.call.request = {id: 'test', type: ''}
+    implementation.subscribeToAggregateStream(simulation.call)
+    emitArgs = simulation.call.emit.firstCall.args
 
-    should(call.emit.calledOnce).be.True()
+    should(simulation.call.emit.calledOnce).be.True()
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
   it('should call.write() every live event about aggregate', (done) => {
     let aggregateIdentity = {id: 'uid', type: 'Test'}
-    let fixtureMessageBus = new EventEmitter()
-    let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces({fixtureMessageBus}))
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
 
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {id: 'uid', type: 'Test'}
-    implementation.subscribeToAggregateStream(call)
-    fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-      {id: 3, aggregateIdentity},
-      {id: 2, aggregateIdentity: {id: 'other', type: 'other'}},
-      {id: 1, aggregateIdentity}
-    ]))
+    simulation.call.request = aggregateIdentity
+    implementation.subscribeToAggregateStream(simulation.call)
+    simulation.store.publishEvents([
+      {id: 100010, aggregateIdentity},
+      {id: 100011, aggregateIdentity: {id: 'other', type: 'other'}},
+      {id: 100012, aggregateIdentity}
+    ])
     setTimeout(function () {
-      let writeCalls = call.write.getCalls()
+      let writeCalls = simulation.call.write.getCalls()
       should(writeCalls.length).equal(2)
-      should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([1, 3])
-      call.emit('end')
+      should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100012])
+      simulation.call.emit('end')
       done()
-    }, 500)
+    }, 300)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
-    let fixtureMessageBus = new EventEmitter()
-    let implementation = GRPCImplementation(FixtureGRPCHandlersInterfaces({fixtureMessageBus}))
+    let aggregateIdentity = {id: 'uid', type: 'Test'}
+    let simulation = InMemorySimulation(data)
+    let implementation = GRPCImplementation(simulation)
 
-    let call = FixtureGRPCHandlersParameters().call
-    call.request = {id: 'uid', type: 'Test'}
-    implementation.subscribeToAggregateStream(call)
+    simulation.call.request = aggregateIdentity
+    implementation.subscribeToAggregateStream(simulation.call)
 
-    fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-      {id: 1, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''},
-      {id: 2, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''}
-    ]))
+    simulation.store.publishEvents([
+      {id: 100010, aggregateIdentity, data: ''},
+      {id: 100011, aggregateIdentity, data: ''}
+    ])
 
     setTimeout(() => {
-      call.emit('end')
-      fixtureMessageBus.emit('StoredEvents', JSON.stringify([
-        {id: 3, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''},
-        {id: 4, aggregateIdentity: {id: 'uid', type: 'Test'}, data: ''}
-      ]))
+      simulation.call.emit('end')
+      simulation.store.publishEvents([
+        {id: 100012, aggregateIdentity, data: ''},
+        {id: 100013, aggregateIdentity, data: ''}
+      ])
     }, 200)
     setTimeout(() => {
-      let calls = call.write.getCalls()
+      let calls = simulation.call.write.getCalls()
       should(calls.length).equal(2)
-      should(calls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([1, 2])
+      should(calls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100011])
       done()
     }, 400)
   })
