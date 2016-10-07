@@ -30,6 +30,7 @@
     "babel-cli": "^6.14.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-preset-es2015": "^6.14.0",
+    "immutable": "^3.8.1",
     "mocha": "^3.0.2",
     "should": "^11.1.0",
     "sinon": "^1.17.6"
@@ -41,7 +42,8 @@
   "standard": {
     "globals": [
       "describe",
-      "it"
+      "it",
+      "data"
     ]
   },
   "repository": {
