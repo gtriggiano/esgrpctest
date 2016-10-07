@@ -178,7 +178,7 @@ function getSimulationData () {
   let instants = events
                   .map(() => random(firstTime, now))
                   .sortBy(ms => ms)
-                  .map(ms => new Date(firstTime + ms))
+                  .map(ms => new Date(ms))
                   .map(d => d.toISOString())
 
   events = events.map(
