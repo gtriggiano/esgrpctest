@@ -36,7 +36,7 @@ service EventStore {
   // Clients can specify a `limit` to receive just N events.
   rpc ReadAggregateStreamForwardFromVersion (BoundedAggregateStreamRequest) returns (stream StoredEvent);
   // Returns the last snapshot of an aggregate.
-  rpc GetLastAggregateSnaphot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
+  rpc GetLastAggregateSnapshot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
 
 
 

@@ -1,6 +1,6 @@
 import { isValidString } from '../../utils'
 
-function GetLastAggregateSnaphot ({backend}) {
+function GetLastAggregateSnapshot ({backend}) {
   return (call, callback) => {
     let { id, type } = call.request
     if (!isValidString(id)) return callback(new TypeError('AggregateIdentity.id should be a non empty string'))
@@ -10,4 +10,4 @@ function GetLastAggregateSnaphot ({backend}) {
   }
 }
 
-export default GetLastAggregateSnaphot
+export default GetLastAggregateSnapshot

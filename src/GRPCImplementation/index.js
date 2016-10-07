@@ -2,7 +2,7 @@ import Ping from './Ping'
 import GetUid from './GetUid'
 
 // Aggregates Queries
-import GetLastAggregateSnaphot from './aggregatesQueries/GetLastAggregateSnaphot'
+import GetLastAggregateSnapshot from './aggregatesQueries/GetLastAggregateSnapshot'
 import ReadAggregateStreamForwardFromVersion from './aggregatesQueries/ReadAggregateStreamForwardFromVersion'
 import SubscribeToAggregateStream from './aggregatesQueries/SubscribeToAggregateStream'
 import SubscribeToAggregateStreamFromVersion from './aggregatesQueries/SubscribeToAggregateStreamFromVersion'
@@ -33,7 +33,7 @@ function GRPCImplementationFactory ({backend, store}) {
     getUid: GetUid(interfaces),
 
     // Aggregates Queries
-    getLastAggregateSnaphot: GetLastAggregateSnaphot(interfaces),
+    getLastAggregateSnapshot: GetLastAggregateSnapshot(interfaces),
     readAggregateStreamForwardFromVersion: ReadAggregateStreamForwardFromVersion(interfaces),
     subscribeToAggregateStream: SubscribeToAggregateStream(interfaces),
     subscribeToAggregateStreamFromVersion: SubscribeToAggregateStreamFromVersion(interfaces),
