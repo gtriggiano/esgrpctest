@@ -14,7 +14,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
     simulation.call.request = {
       fromVersion: 0
     }
-    implementation.subscribeToAggregateStream(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
     let emitArgs = simulation.call.emit.firstCall.args
 
     should(simulation.call.emit.calledOnce).be.True()
@@ -27,7 +27,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       aggregateIdentity: {id: '', type: 'test'},
       fromVersion: 0
     }
-    implementation.subscribeToAggregateStream(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
     emitArgs = simulation.call.emit.firstCall.args
 
     should(simulation.call.emit.calledOnce).be.True()
@@ -40,7 +40,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       aggregateIdentity: {id: 'test', type: ''},
       fromVersion: 0
     }
-    implementation.subscribeToAggregateStream(simulation.call)
+    implementation.readAggregateStreamForwardFromVersion(simulation.call)
     emitArgs = simulation.call.emit.firstCall.args
 
     should(simulation.call.emit.calledOnce).be.True()
