@@ -76,7 +76,7 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
         storedEvents.toJS().map(({id}) => id)
       )
       done()
-    }, storedEvents.size)
+    }, storedEvents.size + 10)
   })
   it('call should .end() after all the stored events are written', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
@@ -99,7 +99,7 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
     setTimeout(() => {
       should(simulation.call.end.calledOnce).be.True()
       done()
-    }, storedEvents.size + 20)
+    }, storedEvents.size + 10)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
@@ -124,6 +124,6 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
       should(simulation.call.end.calledOnce).be.True()
       should(simulation.call.write.getCalls().map(({args}) => args[0] && args[0].id)).not.containDeepOrdered(storedEvents.takeLast(1).toJS().map(({id}) => id))
       done()
-    }, storedEvents.size + 20)
+    }, storedEvents.size + 10)
   })
 })

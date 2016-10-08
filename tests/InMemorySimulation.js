@@ -39,7 +39,7 @@ function FixtureBackend ({aggregates, events, snapshots, store}) {
     }))
     setTimeout(function () {
       results.emit('end')
-    }, events.size + 5)
+    }, events.size)
   }
   function dispatchSnapshot (results, snapshot) {
     process.nextTick(() => {

@@ -117,6 +117,6 @@ describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
       let calls = simulation.call.write.getCalls()
       should(calls.map(({args}) => args[0] && args[0].id)).not.containDeepOrdered([100013, 100014])
       done()
-    }, 250)
+    }, 350)
   })
 })
