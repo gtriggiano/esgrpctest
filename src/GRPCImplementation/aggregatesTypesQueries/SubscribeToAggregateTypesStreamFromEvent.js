@@ -1,6 +1,6 @@
 import Rx from 'rxjs'
 
-import { every } from 'lodash'
+import { every, max } from 'lodash'
 
 import { isValidString, eventsStreamFromBackendEmitter } from '../../utils'
 
@@ -11,7 +11,7 @@ function SubscribeToAggregateTypesStreamFromEvent ({backend, store}) {
     // Validate request
     if (!aggregateTypes.length) return call.emit('error', new TypeError('aggregateTypes should contain one or more non empty strings'))
     if (!every(aggregateTypes, isValidString)) return call.emit('error', new TypeError('aggregateTypes should be a list of non empty strings'))
-    fromEventId = fromEventId >= -1 ? fromEventId : -1
+    fromEventId = max([0, fromEventId])
 
     // Call backend
     let params = {aggregateTypes, fromEventId}

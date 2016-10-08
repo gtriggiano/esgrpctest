@@ -5,7 +5,7 @@ import InMemorySimulation, { AGGREGATE_TYPES } from '../../../tests/InMemorySimu
 
 import GRPCImplementation from '..'
 
-describe.only('.subscribeToAggregateTypesStream(call)', () => {
+describe('.subscribeToAggregateTypesStream(call)', () => {
   it('call should emit `error` if call.request.aggregateTypes is not a valid list of strings', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
