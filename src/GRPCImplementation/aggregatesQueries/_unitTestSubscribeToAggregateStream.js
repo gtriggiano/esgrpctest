@@ -40,7 +40,7 @@ describe('.subscribeToAggregateStream(call)', () => {
       {id: 100011, aggregateIdentity: {id: 'other', type: 'other'}},
       {id: 100012, aggregateIdentity}
     ])
-    setTimeout(function () {
+    setTimeout(() => {
       let writeCalls = simulation.call.write.getCalls()
       should(writeCalls.length).equal(2)
       should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100012])
