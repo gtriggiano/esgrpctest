@@ -1,4 +1,4 @@
-import { every } from 'lodash'
+import { every, max } from 'lodash'
 
 import { isValidString, eventsStreamFromBackendEmitter } from '../../utils'
 
@@ -9,6 +9,8 @@ function ReadAggregateTypesStreamForwardFromEvent ({backend}) {
     // Validate request
     if (!aggregateTypes.length) return call.emit('error', new TypeError('aggregateTypes should contain one or more non empty strings'))
     if (!every(aggregateTypes, isValidString)) return call.emit('error', new TypeError('every item of aggregateTypes should be a non empty string'))
+
+    fromEventId = max([0, fromEventId])
 
     let params = {aggregateTypes, fromEventId}
     if (limit > 0) params.limit = limit
