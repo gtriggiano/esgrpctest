@@ -85,7 +85,7 @@ describe('.subscribeToAggregateTypesStream(call)', () => {
     setTimeout(() => {
       let calls = simulation.call.write.getCalls()
       should(calls.length).equal(2)
-      should(calls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100012])
+      should(calls.map(({args}) => args[0] && args[0].id)).not.containDeepOrdered([100013, 100014])
       done()
     }, 350)
   })
