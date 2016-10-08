@@ -46,7 +46,7 @@ describe('.subscribeToAggregateStream(call)', () => {
       should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100012])
       simulation.call.emit('end')
       done()
-    }, 300)
+    }, 200)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
     let aggregateIdentity = {id: 'uid', type: 'Test'}

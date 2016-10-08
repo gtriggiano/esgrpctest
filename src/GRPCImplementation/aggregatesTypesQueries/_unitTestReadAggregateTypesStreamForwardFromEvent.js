@@ -76,7 +76,7 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
         storedEvents.toJS().map(({id}) => id)
       )
       done()
-    }, storedEvents.size + 20)
+    }, storedEvents.size)
   })
   it('call should .end() after all the stored events are written', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
@@ -118,10 +118,7 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
     }
 
     implementation.readAggregateTypesStreamForwardFromEvent(simulation.call)
-
-    setTimeout(() => {
-      simulation.call.emit('end')
-    }, 1)
+    simulation.call.emit('end')
 
     setTimeout(() => {
       should(simulation.call.end.calledOnce).be.True()

@@ -83,6 +83,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
       {id: 100014, aggregateIdentity: {id: 'other', type: 'other'}},
       {id: 100015, aggregateIdentity: simulation.call.request.aggregateIdentity, sequenceNumber: nextAggregateVersion++}
     ])
+
     setTimeout(() => {
       let writeCalls = simulation.call.write.getCalls()
       should(writeCalls.length).equal(storedEvents.size + 4)
@@ -91,7 +92,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
       )
       simulation.call.emit('end')
       done()
-    }, 300)
+    }, storedEvents.size + 200)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))

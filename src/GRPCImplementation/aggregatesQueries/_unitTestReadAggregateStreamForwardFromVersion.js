@@ -65,7 +65,6 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
   })
   it('should call.write() the right sequence of fetched events about aggregate', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
-    let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
       evt.get('aggregateId') === testAggregate.get('id') &&
       evt.get('aggregateType') === testAggregate.get('type')
@@ -73,6 +72,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
     let minVersion = random(1, storedEvents.size)
     storedEvents = storedEvents.filter(evt => evt.get('sequenceNumber') > minVersion)
 
+    let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
     simulation.call.request = {
@@ -89,7 +89,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
         storedEvents.toJS().map(({id}) => id)
       )
       done()
-    }, 200)
+    }, storedEvents.size + 10)
   })
   it('call should .end() after all the stored events are written', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
@@ -115,7 +115,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       should(writeCalls.length).equal(storedEvents.size)
       should(simulation.call.end.calledOnce).be.True()
       done()
-    }, 200)
+    }, storedEvents.size + 10)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
@@ -133,15 +133,12 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
     }
 
     implementation.readAggregateStreamForwardFromVersion(simulation.call)
-
-    setTimeout(() => {
-      simulation.call.emit('end')
-    }, 1)
+    simulation.call.emit('end')
 
     setTimeout(() => {
       should(simulation.call.end.calledOnce).be.True()
       should(simulation.call.write.getCalls().map(({args}) => args[0] && args[0].id)).not.containDeepOrdered(storedEvents.takeLast(1).toJS().map(({id}) => id))
       done()
-    }, 200)
+    }, storedEvents.size + 10)
   })
 })
