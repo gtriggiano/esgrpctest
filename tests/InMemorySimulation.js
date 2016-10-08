@@ -34,20 +34,20 @@ function InMemorySimulation (data) {
 
 function FixtureBackend ({aggregates, events, snapshots, store}) {
   function dispatchEvents (results, events) {
-    events.forEach((evt, idx) => setTimeout(() => {
+    events.forEach((evt, idx) => process.nextTick(() => {
       results.emit('event', evt.toJS())
-    }, idx + 5))
+    }))
     setTimeout(function () {
       results.emit('end')
     }, events.size + 5)
   }
   function dispatchSnapshot (results, snapshot) {
-    setTimeout(() => {
+    process.nextTick(() => {
       results.emit('snapshot', snapshot.toJS())
-    }, 5)
+    })
     setTimeout(function () {
       results.emit('end')
-    }, 10)
+    }, 5)
   }
 
   return {
