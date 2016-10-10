@@ -1,7 +1,7 @@
 import { forEach } from 'lodash'
 
 import apiHandlersFactories from './api'
-import { setupConnectionsPool, getConnection } from './helpers/db'
+import setupConnectionsPool from './helpers/setupConnectionsPool'
 import setupDatabase from './operations/setup'
 import { prefixString, isValidString, isPositiveInteger } from './../../../utils'
 
@@ -9,7 +9,7 @@ function CockroachDBBackend (_settings) {
   let settings = {...defaultSettings, ..._settings}
   _validateSettings(settings)
 
-  setupConnectionsPool(settings)
+  let getConnection = setupConnectionsPool(settings)
 
   let backend = {}
 

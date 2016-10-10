@@ -7,7 +7,7 @@ function setupDatabase (client) {
   return new Promise((resolve, reject) => {
     fs.readFile(setupSQLFile, (err, setupQuery) => {
       if (err) return reject(err)
-      client.query(setupQuery, err => {
+      client.query(setupQuery.toString(), err => {
         if (err) return reject(err)
         resolve()
       })
