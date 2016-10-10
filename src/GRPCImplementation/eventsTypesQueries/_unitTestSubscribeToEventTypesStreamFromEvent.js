@@ -41,7 +41,8 @@ describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
 
     simulation.call.request = {
       eventTypes: ['typeOne', 'typeTwo'],
-      fromEventId: random(-10, 10)
+      fromEventId: random(-10, 10),
+      limit: random(-10, 10)
     }
 
     implementation.subscribeToEventTypesStreamFromEvent(simulation.call)
@@ -50,6 +51,7 @@ describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
     should(calls.length === 1).be.True()
     should(calls[0].args[0].eventTypes).containDeepOrdered(simulation.call.request.eventTypes)
     should(calls[0].args[0].fromEventId).equal(max([0, simulation.call.request.fromEventId]))
+    should(calls[0].args[0].limit).equal(undefined)
   })
   it('should call.write() the right sequence of fetched and live events with type within the given types', (done) => {
     let testTypes = sampleSize(EVENT_TYPES.toJS(), 2)

@@ -41,7 +41,8 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
 
     simulation.call.request = {
       eventTypes: ['typeOne', 'typeTwo'],
-      fromEventId: random(-10, 10)
+      fromEventId: random(-10, 10),
+      limit: random(-10, 10)
     }
 
     implementation.readEventTypesStreamForwardFromEvent(simulation.call)
@@ -50,6 +51,9 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
     should(calls.length === 1).be.True()
     should(calls[0].args[0].eventTypes).containDeepOrdered(simulation.call.request.eventTypes)
     should(calls[0].args[0].fromEventId).equal(max([0, simulation.call.request.fromEventId]))
+    should(calls[0].args[0].limit).equal(
+      simulation.call.request.limit < 1 ? undefined : simulation.call.request.limit
+    )
   })
   it('should call.write() the right sequence of fetched events', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)

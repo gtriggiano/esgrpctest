@@ -45,7 +45,8 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
 
     simulation.call.request = {
       aggregateIdentity: {id: 'uid', type: 'test'},
-      fromVersion: random(-10, 10)
+      fromVersion: random(-10, 10),
+      limit: random(-10, 10)
     }
 
     implementation.subscribeToAggregateStreamFromVersion(simulation.call)
@@ -54,6 +55,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
     should(calls.length === 1).be.True()
     should(calls[0].args[0].aggregateIdentity).containEql(simulation.call.request.aggregateIdentity)
     should(calls[0].args[0].fromVersion).equal(max([0, simulation.call.request.fromVersion]))
+    should(calls[0].args[0].limit).equal(undefined)
   })
   it('should call.write() the right sequence of fetched and live events about aggregate', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
