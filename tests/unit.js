@@ -5,7 +5,7 @@ import EventStore from '../src'
 import { getSimulationData } from './InMemorySimulation'
 global.data = getSimulationData()
 
-describe('gRPC Event Store Package Unit Tests', function () {
+describe('GRPC Event Store Package Unit Tests', function () {
   it('should be fun to work with', () => {})
   it(`let EventStore = require('grpc-event-store'); typeof EventStore === 'function'`, () => {
     should(EventStore).be.a.Function()
@@ -14,11 +14,11 @@ describe('gRPC Event Store Package Unit Tests', function () {
     let eventStore = EventStore()
     should(eventStore).be.an.instanceof(EventEmitter)
   })
-
-  require('../src/_unitTestUtils')
-  require('../src/_unitTestBackendInterface')
-  require('../src/_unitTestStoreInterface')
-  require('../src/_unitTestGRPCInterface')
-  require('../src/_unitTestGRPCImplementation')
-  require('../src/_unitTestServiceNode')
 })
+
+require('../src/_unitTestUtils')
+require('../src/_unitTestBackendInterface')
+require('../src/_unitTestStoreInterface')
+require('../src/_unitTestGRPCInterface')
+require('../src/_unitTestGRPCImplementation')
+require('../src/_unitTestServiceNode')
