@@ -1,5 +1,5 @@
 function Ping () {
-  return (_, cb) => cb(null, {})
+  return (_, callback) => callback(null, {})
 }
 
 export default Ping

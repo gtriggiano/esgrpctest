@@ -2,7 +2,7 @@ import { merge, isArray } from 'lodash'
 import EventEmitter from 'eventemitter3'
 import { DNSNode } from 'dnsmq-messagebus'
 
-import { prefixString, isValidString, isPositiveInteger, eventStreamFromBus } from './utils'
+import { prefixString, isValidString, isPositiveInteger, eventsStreamFromBus } from './utils'
 
 function StoreInterface (_settings) {
   let settings = merge({}, defaultSettings, _settings)
@@ -17,7 +17,7 @@ function StoreInterface (_settings) {
 
   // Private API
   let _bus = DNSNode(host, {coordinationPort})
-  let _eventsStream = eventStreamFromBus(_bus, 50)
+  let _eventsStream = eventsStreamFromBus(_bus, 50)
   _bus.subscribe('StoredEvents')
   _bus.on('connect', () => store.emit('connect'))
   _bus.on('disconnect', () => store.emit('disconnect'))

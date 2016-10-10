@@ -6,9 +6,15 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
-      - ./lib:/package/lib
       - ./src:/package/src
       - ./tests:/package/tests
       - ./.babelrc:/package/.babelrc
-      - ./gRPCEventStore.proto:/package/gRPCEventStore.proto
+      - ./GRPCEventStore.proto:/package/GRPCEventStore.proto
       - ./package.json:/package/package.json
+
+  cockroach:
+    image: cockroachdb/cockroach:beta-20160929
+    ports:
+      - "8080:8080"
+      - "26257:26257"
+    command: start --insecure

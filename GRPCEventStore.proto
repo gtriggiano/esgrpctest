@@ -1,11 +1,13 @@
 syntax = "proto3";
 
-package gRPCEventStore;
+package grpceventstore;
 
-service Api {
+service EventStore {
   // Ping
   rpc Ping (EmptyDTO) returns (EmptyDTO);
 
+  // Get a uuid
+  rpc GetUid (EmptyDTO) returns (UidResponse);
 
   /////////////////////////////////
   // QUERIES TO THE ENTIRE STORE //
@@ -34,7 +36,7 @@ service Api {
   // Clients can specify a `limit` to receive just N events.
   rpc ReadAggregateStreamForwardFromVersion (BoundedAggregateStreamRequest) returns (stream StoredEvent);
   // Returns the last snapshot of an aggregate.
-  rpc GetLastAggregateSnaphot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
+  rpc GetLastAggregateSnapshot (AggregateIdentity) returns (LastAggregateSnapshotResponse);
 
 
 
@@ -78,6 +80,10 @@ service Api {
 
 message EmptyDTO {}
 
+message UidResponse {
+  string uid = 1;
+}
+
 message Event {
   string type = 1;
   string data = 2;
@@ -109,7 +115,7 @@ message LastAggregateSnapshotResponse {
 }
 
 message AggregateIdentity {
-  string uuid = 1;
+  string id = 1;
   string type = 2;
 }
 
@@ -152,5 +158,5 @@ message WriteToAggregateStreamRequest {
 }
 
 message WriteToMultipleAggregateStreamRequest {
-  repeated WriteToAggregateStreamRequest writingRequests = 1;
+  repeated WriteToAggregateStreamRequest writeRequests = 1;
 }

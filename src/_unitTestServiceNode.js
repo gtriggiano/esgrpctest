@@ -16,11 +16,11 @@ describe('ServiceNode(settings)', function () {
     should(throwing).throw()
     should(throwing2).throw()
   })
-  it('should warn if settings.backendSetupTimeout is lower than 500', () => {
-    let stub = sinon.stub(console, 'warn', () => {})
+  it('should console.warn() if settings.backendSetupTimeout is lower than 500', () => {
+    sinon.stub(console, 'warn', () => {})
     ServiceNode({backendSetupTimeout: 499})
-    should(stub.called).equal(true)
-    stub.restore()
+    should(console.warn.called).equal(true)
+    console.warn.restore()
   })
   describe('serviceNode', () => {
     it('should be an instance of EventEmitter', () => {

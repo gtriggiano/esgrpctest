@@ -2,6 +2,8 @@ import should from 'should/as-function'
 import EventEmitter from 'eventemitter3'
 
 import EventStore from '../src'
+import { getSimulationData } from './InMemorySimulation'
+global.data = getSimulationData()
 
 describe('gRPC Event Store Package Unit Tests', function () {
   it('should be fun to work with', () => {})
@@ -17,5 +19,6 @@ describe('gRPC Event Store Package Unit Tests', function () {
   require('../src/_unitTestBackendInterface')
   require('../src/_unitTestStoreInterface')
   require('../src/_unitTestGRPCInterface')
+  require('../src/_unitTestGRPCImplementation')
   require('../src/_unitTestServiceNode')
 })

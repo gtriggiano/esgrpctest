@@ -26,7 +26,7 @@ function ServiceNode (_settings) {
   let _connecting = false
   let _disconnecting = false
   let _backend = BackendInterface(backend || {})
-  let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timed out.`))
+  let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timeout.`))
   let _store = StoreInterface({host, coordinationPort})
   let _grpcServer = GRPCInterface(assign(
     {},
@@ -43,6 +43,7 @@ function ServiceNode (_settings) {
     _backend.setup(_backendSetupTimeout((err) => {
       if (err) {
         _connecting = false
+        node.emit('error', err)
         console.error(err)
         return
       }
