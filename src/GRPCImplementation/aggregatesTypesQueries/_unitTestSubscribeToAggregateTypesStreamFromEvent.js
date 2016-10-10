@@ -82,7 +82,7 @@ describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
       should(writeCalls.map(({args}) => args[0] && args[0].id)).containDeepOrdered([100010, 100012])
       simulation.call.emit('end')
       done()
-    }, storedEvents.size + 100)
+    }, storedEvents.size + 150)
   })
   it('should stop call.write()-ing if client ends subscription', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
