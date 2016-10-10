@@ -63,12 +63,15 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
     )
     let fromEventId = random(1, storedEvents.size)
     storedEvents = storedEvents.filter(evt => evt.get('id') > fromEventId)
+    let limit = random(storedEvents.size)
+    if (limit) storedEvents = storedEvents.slice(0, limit)
 
     let implementation = GRPCImplementation(simulation)
 
     simulation.call.request = {
       aggregateTypes: testAggregateTypes,
-      fromEventId
+      fromEventId,
+      limit
     }
 
     implementation.readAggregateTypesStreamForwardFromEvent(simulation.call)
@@ -126,7 +129,7 @@ describe('.readAggregateTypesStreamForwardFromEvent(call)', () => {
 
     setTimeout(() => {
       should(simulation.call.end.calledOnce).be.True()
-      should(simulation.call.write.getCalls().map(({args}) => args[0] && args[0].id)).not.containDeepOrdered(storedEvents.takeLast(1).toJS().map(({id}) => id))
+      should(simulation.call.write.getCalls().length).equal(0)
       done()
     }, storedEvents.size + 10)
   })

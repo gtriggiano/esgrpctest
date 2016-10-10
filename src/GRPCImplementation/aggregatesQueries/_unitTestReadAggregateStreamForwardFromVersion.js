@@ -75,13 +75,16 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
     )
     let minVersion = random(1, storedEvents.size)
     storedEvents = storedEvents.filter(evt => evt.get('sequenceNumber') > minVersion)
+    let limit = random(storedEvents.size)
+    if (limit) storedEvents = storedEvents.slice(0, limit)
 
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
     simulation.call.request = {
       aggregateIdentity: pick(testAggregate.toJS(), ['id', 'type']),
-      fromVersion: minVersion
+      fromVersion: minVersion,
+      limit
     }
 
     implementation.readAggregateStreamForwardFromVersion(simulation.call)
@@ -141,7 +144,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
 
     setTimeout(() => {
       should(simulation.call.end.calledOnce).be.True()
-      should(simulation.call.write.getCalls().map(({args}) => args[0] && args[0].id)).not.containDeepOrdered(storedEvents.takeLast(1).toJS().map(({id}) => id))
+      should(simulation.call.write.getCalls().length).equal(0)
       done()
     }, storedEvents.size + 10)
   })
