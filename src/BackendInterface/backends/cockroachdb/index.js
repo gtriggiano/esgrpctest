@@ -1,4 +1,4 @@
-import { assign, forEach } from 'lodash'
+import { forEach } from 'lodash'
 
 import apiHandlersFactories from './api'
 import { setupConnectionsPool, getConnection } from './helpers/db'
@@ -6,7 +6,7 @@ import setupDatabase from './operations/setup'
 import { prefixString, isValidString, isPositiveInteger } from './../../../utils'
 
 function CockroachDBBackend (_settings) {
-  let settings = assign({}, defaultSettings, _settings)
+  let settings = {...defaultSettings, ..._settings}
   _validateSettings(settings)
 
   setupConnectionsPool(settings)

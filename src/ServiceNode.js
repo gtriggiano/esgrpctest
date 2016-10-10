@@ -1,4 +1,4 @@
-import { isInteger, assign } from 'lodash'
+import { isInteger } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
 import BackendInterface from './BackendInterface'
@@ -7,7 +7,7 @@ import StoreInterface from './StoreInterface'
 import { prefixString, timeoutCallback } from './utils'
 
 function ServiceNode (_settings) {
-  let settings = assign({}, defaultSettings, _settings)
+  let settings = {...defaultSettings, ..._settings}
   _validateSettings(settings)
 
   let node = new EventEmitter()
@@ -28,12 +28,12 @@ function ServiceNode (_settings) {
   let _backend = BackendInterface(backend || {})
   let _backendSetupTimeout = timeoutCallback(backendSetupTimeout, iMsg(`Backend setup timeout.`))
   let _store = StoreInterface({host, coordinationPort})
-  let _grpcServer = GRPCInterface(assign(
-    {},
-    {backend: _backend, store: _store},
-    port ? {port} : {},
-    credentials ? {credentials} : {}
-  ))
+  let _grpcServer = GRPCInterface({
+    backend: _backend,
+    store: _store,
+    ...(port ? {port} : {}),
+    ...(credentials ? {credentials} : {})
+  })
 
   // Public api
   function connect () {
