@@ -1,8 +1,12 @@
+import { max } from 'lodash'
+
 import { eventsStreamFromBackendEmitter } from '../../utils'
 
 function ReadStoreStreamForwardFromEvent ({backend}) {
   return (call) => {
     let {fromEventId, limit} = call.request
+
+    fromEventId = max([0, fromEventId])
 
     let params = {fromEventId}
     if (limit > 0) params.limit = limit

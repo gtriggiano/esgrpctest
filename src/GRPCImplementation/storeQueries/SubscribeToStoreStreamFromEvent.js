@@ -1,10 +1,12 @@
 import Rx from 'rxjs'
+import { max } from 'lodash'
 
 import { eventsStreamFromBackendEmitter } from '../../utils'
 
 function SubscribeToStoreStreamFromEvent ({backend, store}) {
   return (call) => {
     let {fromEventId} = call.request
+    fromEventId = max([0, fromEventId])
 
     // Call backend
     let params = {fromEventId}
