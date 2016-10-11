@@ -50,12 +50,15 @@ function writeToAggregateStream (client, request, transactionId) {
 
   let eMsg = prefixString(`[${aggregateIdentity.type}@${aggregateIdentity.id}] `)
 
-  let consistentVersioningRequired = expectedAggregateVersion > 0
+  let consistentVersioningRequired = expectedAggregateVersion > -1
 
   return getAggregate(client, aggregateIdentity)
     .then(aggregate => {
       if (!consistentVersioningRequired) return aggregate || createAggregate(client, aggregateIdentity)
-
+      if (expectedAggregateVersion === 0) {
+        if (aggregate) throw new Error(eMsg('Aggregate already exists'))
+        return createAggregate(client, aggregateIdentity)
+      }
       if (!aggregate) throw new Error(eMsg('Aggregate does not exists'))
       if (aggregate.version !== expectedAggregateVersion) throw new Error(eMsg('Aggregate version mismatch'))
 

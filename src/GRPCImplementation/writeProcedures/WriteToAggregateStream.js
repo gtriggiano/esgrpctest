@@ -40,7 +40,7 @@ function validateAndGetBackendWriteRequest (request, requestIndex) {
   if (!events.length) throw new Error(eMgs('events should be a list of events to store'))
   if (!every(events, ({type}) => isValidString(type))) throw new TypeError(eMgs('events should have a valid type'))
 
-  expectedAggregateVersion = max([0, expectedAggregateVersion])
+  expectedAggregateVersion = max([-1, expectedAggregateVersion])
 
   let params = {
     aggregateIdentity,
