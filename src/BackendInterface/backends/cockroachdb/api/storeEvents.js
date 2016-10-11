@@ -50,7 +50,7 @@ function writeToAggregateStream (client, request, transactionId) {
 
   let eMsg = prefixString(`[${aggregateIdentity.type}@${aggregateIdentity.id}] `)
 
-  let consistentVersioningRequired = expectedAggregateVersion >= 0
+  let consistentVersioningRequired = expectedAggregateVersion > 0
 
   return getAggregate(client, aggregateIdentity)
     .then(aggregate => {
