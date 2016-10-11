@@ -24,7 +24,7 @@ import SubscribeToStoreStreamFromEvent from './storeQueries/SubscribeToStoreStre
 
 // Write Procedures
 import WriteToAggregateStream from './writeProcedures/WriteToAggregateStream'
-import WriteToMultipleAggregateStream from './writeProcedures/WriteToMultipleAggregateStream'
+import WriteToMultipleAggregateStreams from './writeProcedures/WriteToMultipleAggregateStreams'
 
 function GRPCImplementationFactory ({backend, store}) {
   let interfaces = {backend, store}
@@ -55,7 +55,7 @@ function GRPCImplementationFactory ({backend, store}) {
 
     // Write Procedures
     writeToAggregateStream: WriteToAggregateStream(interfaces),
-    writeToMultipleAggregateStream: WriteToMultipleAggregateStream(interfaces)
+    writeToMultipleAggregateStreams: WriteToMultipleAggregateStreams(interfaces)
   }
 }
 

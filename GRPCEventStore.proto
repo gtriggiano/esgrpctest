@@ -75,7 +75,7 @@ service EventStore {
   // Attempts to write a list of events into an aggregate stream
   rpc WriteToAggregateStream (WriteToAggregateStreamRequest) returns (EmptyDTO);
   // Attempts to write N list of events into N aggregate streams
-  rpc WriteToMultipleAggregateStream (WriteToMultipleAggregateStreamRequest) returns (EmptyDTO);
+  rpc WriteToMultipleAggregateStreams (WriteToMultipleAggregateStreamsRequest) returns (EmptyDTO);
 }
 
 message EmptyDTO {}
@@ -157,6 +157,6 @@ message WriteToAggregateStreamRequest {
   string snapshot = 4;
 }
 
-message WriteToMultipleAggregateStreamRequest {
+message WriteToMultipleAggregateStreamsRequest {
   repeated WriteToAggregateStreamRequest writeRequests = 1;
 }
