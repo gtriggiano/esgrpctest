@@ -1,5 +1,5 @@
 import shortid from 'shortid'
-import { every, min } from 'lodash'
+import { every, max } from 'lodash'
 
 import { isValidString, prefixString } from '../../utils'
 
@@ -40,7 +40,7 @@ function validateAndGetBackendWriteRequest (request, requestIndex) {
   if (!events.length) throw new Error(eMgs('events should be a list of events to store'))
   if (!every(events, ({type}) => isValidString(type))) throw new TypeError(eMgs('events should have a valid type'))
 
-  expectedAggregateVersion = min([-1, expectedAggregateVersion])
+  expectedAggregateVersion = max([0, expectedAggregateVersion])
 
   let params = {
     aggregateIdentity,
