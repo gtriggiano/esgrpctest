@@ -19,7 +19,14 @@ function getLastSnapshotOfAggregateFactory (getConnection) {
 
       let query = client.query(queryString, queryParams)
 
-      query.on('row', row => results.emit('snapshot', row))
+      query.on('row', row => results.emit('snapshot', {
+        aggregateIdentity: {
+          id: row.aggregateId,
+          type: row.aggregateType
+        },
+        version: parseInt(row.version, 10),
+        data: row.data.toString()
+      }))
       query.on('error', err => {
         results.emit('error', err)
         query.removeAllListeners()
