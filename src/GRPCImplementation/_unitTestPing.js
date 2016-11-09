@@ -5,7 +5,7 @@ import InMemorySimulation from '../../tests/InMemorySimulation'
 import GRPCImplementation from '.'
 
 describe('.ping(_, callback)', () => {
-  it('should call callback(null, {})', () => {
+  it('calls callback(null, {})', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
     implementation.ping(simulation.call, simulation.callback)

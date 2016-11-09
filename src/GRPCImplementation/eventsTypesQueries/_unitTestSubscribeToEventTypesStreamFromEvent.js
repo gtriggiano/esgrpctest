@@ -6,7 +6,7 @@ import InMemorySimulation, { EVENT_TYPES } from '../../../tests/InMemorySimulati
 import GRPCImplementation from '..'
 
 describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
-  it('call should emit `error` if call.request.eventTypes is not a valid list of strings', () => {
+  it('emits `error` on call if call.request.eventTypes is not a valid list of strings', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -35,7 +35,7 @@ describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call backend.getEventsByTypes() with right parameters', () => {
+  it('invokes backend.getEventsByTypes() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -53,7 +53,7 @@ describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
     should(calls[0].args[0].fromEventId).equal(max([0, simulation.call.request.fromEventId]))
     should(calls[0].args[0].limit).equal(undefined)
   })
-  it('should call.write() the right sequence of fetched and live events with type within the given types', (done) => {
+  it('invokes call.write() for every fetched and live event with type within the given types, in the right sequence', (done) => {
     let testTypes = sampleSize(EVENT_TYPES.toJS(), 2)
     let storedEvents = data.events.filter(evt =>
       !!~testTypes.indexOf(evt.get('type'))
@@ -84,7 +84,7 @@ describe('.subscribeToEventTypesStreamFromEvent(call)', () => {
       done()
     }, storedEvents.size + 150)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testTypes = sampleSize(EVENT_TYPES.toJS(), 2)
     let storedEvents = data.events.filter(evt =>
       !!~testTypes.indexOf(evt.get('type'))

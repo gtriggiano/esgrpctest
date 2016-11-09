@@ -6,7 +6,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.readStoreStreamForwardFromEvent(call)', () => {
-  it('should call backend.getEvents() with right parameters', () => {
+  it('invokes backend.getEvents() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -26,7 +26,7 @@ describe('.readStoreStreamForwardFromEvent(call)', () => {
         : simulation.call.request.limit
     )
   })
-  it('should call.write() the right sequence of fetched events', (done) => {
+  it('invokes call.write() for every fetched event, in the right sequence', (done) => {
     let simulation = InMemorySimulation(data)
     let fromEventId = random(data.events.size)
     let storedEvents = data.events.filter(evt => evt.get('id') > fromEventId)
@@ -51,7 +51,7 @@ describe('.readStoreStreamForwardFromEvent(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('call should .end() after all the stored events are written', (done) => {
+  it('invokes call.end() after all the stored events are written', (done) => {
     let simulation = InMemorySimulation(data)
     let fromEventId = random(data.events.size)
     let storedEvents = data.events.filter(evt => evt.get('id') > fromEventId)
@@ -72,7 +72,7 @@ describe('.readStoreStreamForwardFromEvent(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let simulation = InMemorySimulation(data)
     let fromEventId = random(data.events.size)
     let storedEvents = data.events.filter(evt => evt.get('id') > fromEventId)

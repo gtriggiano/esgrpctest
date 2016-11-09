@@ -5,8 +5,8 @@ import grpc from 'grpc'
 import GRPCInterface from './GRPCInterface'
 
 describe('GRPCInterface(settings)', function () {
-  it('should be a function', () => { should(GRPCInterface).be.a.Function() })
-  it('should throw if `settings.port` is not a positive integer', () => {
+  it('is a function', () => { should(GRPCInterface).be.a.Function() })
+  it('throws if `settings.port` is not a positive integer', () => {
     function notThrowing () {
       GRPCInterface({port: 1})
     }
@@ -20,7 +20,7 @@ describe('GRPCInterface(settings)', function () {
     should(throwing).throw()
     should(throwing1).throw()
   })
-  it('should throw if `settings.credentials is not an instance of grpc.ServerCredentials`', () => {
+  it('throws if `settings.credentials is not an instance of grpc.ServerCredentials`', () => {
     function notThrowing () {
       GRPCInterface({credentials: grpc.ServerCredentials.createInsecure()})
     }
@@ -31,11 +31,11 @@ describe('GRPCInterface(settings)', function () {
     should(throwing).throw()
   })
   describe('grpcIface', () => {
-    it('should be an instance of EventEmitter', () => {
+    it('is an instance of EventEmitter', () => {
       let grpcIface = GRPCInterface()
       should(grpcIface).be.an.instanceof(EventEmitter)
     })
-    it('grpcIface.connect and grpcIface.disconnect should be functions', () => {
+    it('grpcIface.connect and grpcIface.disconnect are functions', () => {
       let iface = GRPCInterface()
       should(iface.connect).be.a.Function()
       should(iface.disconnect).be.a.Function()

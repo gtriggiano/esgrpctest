@@ -5,8 +5,8 @@ import EventEmitter from 'eventemitter3'
 import ServiceNode from './ServiceNode'
 
 describe('ServiceNode(settings)', function () {
-  it('should be a function', () => { should(ServiceNode).be.a.Function() })
-  it('should throw if settings.backendSetupTimeout is not integer or is < 1', () => {
+  it('is a function', () => { should(ServiceNode).be.a.Function() })
+  it('throws if settings.backendSetupTimeout is not integer or is < 1', () => {
     function throwing () {
       ServiceNode({backendSetupTimeout: ''})
     }
@@ -16,18 +16,18 @@ describe('ServiceNode(settings)', function () {
     should(throwing).throw()
     should(throwing2).throw()
   })
-  it('should console.warn() if settings.backendSetupTimeout is lower than 500', () => {
+  it('console.warn()s if settings.backendSetupTimeout is lower than 500', () => {
     sinon.stub(console, 'warn', () => {})
     ServiceNode({backendSetupTimeout: 499})
     should(console.warn.called).equal(true)
     console.warn.restore()
   })
   describe('serviceNode', () => {
-    it('should be an instance of EventEmitter', () => {
+    it('is an instance of EventEmitter', () => {
       let node = ServiceNode()
       should(node).be.an.instanceof(EventEmitter)
     })
-    it('serviceNode.connect and serviceNode.disconnect should be functions', () => {
+    it('serviceNode.connect and serviceNode.disconnect are functions', () => {
       let node = ServiceNode()
       should(node.connect).be.a.Function()
       should(node.disconnect).be.a.Function()

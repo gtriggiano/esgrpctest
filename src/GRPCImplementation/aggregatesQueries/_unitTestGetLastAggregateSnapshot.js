@@ -5,7 +5,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.getLastAggregateSnapshot', () => {
-  it('should call callback(err) if call.request is not a valid aggregateIdentity', () => {
+  it('calls callback(err) if call.request is not a valid aggregateIdentity', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 

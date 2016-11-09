@@ -6,7 +6,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.subscribeToStoreStreamFromEvent(call)', () => {
-  it('should call backend.getEvents() with right parameters', () => {
+  it('invokes backend.getEvents() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -22,7 +22,7 @@ describe('.subscribeToStoreStreamFromEvent(call)', () => {
     should(calls[0].args[0].fromEventId).equal(max([0, simulation.call.request.fromEventId]))
     should(calls[0].args[0].limit).equal(undefined)
   })
-  it('should call.write() the right sequence of fetched and live events', (done) => {
+  it('invokes call.write() for every fetched and live event, in the right sequence', (done) => {
     let fromEventId = data.events.size - 3
     let storedEvents = data.events.filter(evt => evt.get('id') > fromEventId)
 
@@ -46,7 +46,7 @@ describe('.subscribeToStoreStreamFromEvent(call)', () => {
       done()
     }, storedEvents.size + 150)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let fromEventId = random(1, data.events.size)
 
     let simulation = InMemorySimulation(data)

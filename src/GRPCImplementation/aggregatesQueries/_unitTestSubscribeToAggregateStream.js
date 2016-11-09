@@ -5,7 +5,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateStream(call)', () => {
-  it('should emit `error` on call if call.request is not a valid aggregateIdentity', () => {
+  it('emits `error` on call if call.request is not a valid aggregateIdentity', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -28,7 +28,7 @@ describe('.subscribeToAggregateStream(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call.write() every live event about aggregate', (done) => {
+  it('invokes call.write() with every live event about aggregate', (done) => {
     let aggregateIdentity = {id: 'uid', type: 'Test'}
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
@@ -48,7 +48,7 @@ describe('.subscribeToAggregateStream(call)', () => {
       done()
     }, 200)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let aggregateIdentity = {id: 'uid', type: 'Test'}
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
