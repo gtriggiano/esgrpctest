@@ -41,4 +41,9 @@ describe('GRPCImplementation({backend, store})', () => {
     require('./GRPCImplementation/storeQueries/_unitTestSubscribeToStoreStream')
     require('./GRPCImplementation/storeQueries/_unitTestSubscribeToStoreStreamFromEvent')
   })
+
+  describe('Write Procedures', function () {
+    require('./GRPCImplementation/writeProcedures/_unitTestWriteToAggregateStream')
+    require('./GRPCImplementation/writeProcedures/_unitTestWriteToMultipleAggregateStreams')
+  })
 })
