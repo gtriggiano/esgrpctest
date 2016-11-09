@@ -11,13 +11,14 @@ import {
   prefixString,
   timeoutCallback,
   isValidString,
+  isValidHostname,
   isPositiveInteger,
   zeropad,
   eventsStreamFromBus,
   eventsStreamFromBackendEmitter
 } from './utils'
 
-describe('Utilities', () => {
+describe.only('Utilities', () => {
   describe('prefixString(prefix, str)', () => {
     it('should be a function', () => should(prefixString).be.a.Function())
     it('should be curried', () => {
@@ -79,6 +80,16 @@ describe('Utilities', () => {
       should(isValidString([])).be.False()
       should(isValidString(1)).be.False()
       should(isValidString(() => {})).be.False()
+    })
+  })
+  describe('isValidHostname(str)', () => {
+    it('should be a function', () => should(isValidHostname).be.a.Function())
+    it('should return true if `str` is a valid hostname, false otherwise', () => {
+      should(isValidHostname('github')).be.True()
+      should(isValidHostname('github.com')).be.True()
+      should(isValidHostname('')).be.False()
+      should(isValidHostname('@github')).be.False()
+      should(isValidHostname('@github..com')).be.False()
     })
   })
   describe('isPositiveInteger(n)', () => {
