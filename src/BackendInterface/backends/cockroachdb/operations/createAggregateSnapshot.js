@@ -15,7 +15,7 @@ export default function createAggregateSnapshot (client, aggregateIdentity, vers
 
     client.query(
       insertQueryString,
-      [id, type, version, data],
+      [id, type, version, new Buffer(data, 'utf8')],
       (err) => {
         if (err) return reject(err)
         resolve()
