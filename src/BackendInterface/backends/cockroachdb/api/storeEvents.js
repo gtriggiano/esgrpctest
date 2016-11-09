@@ -26,8 +26,14 @@ function storeEventsFactory (getConnection) {
             )
           )
           .then(responses => {
-            let errors = responses.filter(response => !!response.error)
-            if (errors.length) throw new Error(errors)
+            let errors = responses
+              .filter(response => response instanceof Error)
+            if (errors.length) {
+              let errorsMessages = errors
+                .map(({message}) => message)
+                .join(', ')
+              throw new Error(`Events writing failed because of the following errors: ${errorsMessages}`)
+            }
             return flatten(responses)
           })
           .then(storedEvents => done(null, storedEvents))
@@ -48,19 +54,33 @@ function storeEventsFactory (getConnection) {
 function writeToAggregateStream (client, request, transactionId) {
   let { aggregateIdentity, events, expectedAggregateVersion, snapshot } = request
 
-  let eMsg = prefixString(`[${aggregateIdentity.type}@${aggregateIdentity.id}] `)
+  let eMsg = prefixString(`Aggregate [${aggregateIdentity.type}@${aggregateIdentity.id}] `)
 
   let consistentVersioningRequired = expectedAggregateVersion > -1
+  let clientWantsToCreateAggregate = expectedAggregateVersion === 0
 
   return getAggregate(client, aggregateIdentity)
     .then(aggregate => {
-      if (!consistentVersioningRequired) return aggregate || createAggregate(client, aggregateIdentity)
-      if (expectedAggregateVersion === 0) {
-        if (aggregate) throw new Error(eMsg('Aggregate already exists'))
-        return createAggregate(client, aggregateIdentity)
-      }
-      if (!aggregate) throw new Error(eMsg('Aggregate does not exists'))
-      if (aggregate.version !== expectedAggregateVersion) throw new Error(eMsg('Aggregate version mismatch'))
+      let aggregateExists = !!aggregate
+      if (
+        !consistentVersioningRequired &&
+        aggregateExists
+      ) return aggregate
+      if (
+        !consistentVersioningRequired &&
+        !aggregateExists
+      ) return createAggregate(client, aggregateIdentity)
+      if (
+        clientWantsToCreateAggregate &&
+        aggregateExists
+      ) throw new Error(eMsg('already exists'))
+      if (
+        clientWantsToCreateAggregate &&
+        !aggregateExists
+      ) return createAggregate(client, aggregateIdentity)
+
+      if (!aggregate) throw new Error(eMsg('does not exists'))
+      if (aggregate.version !== expectedAggregateVersion) throw new Error(eMsg('version mismatch'))
 
       return aggregate
     })
@@ -89,7 +109,7 @@ function writeToAggregateStream (client, request, transactionId) {
           ).then(() => storedEvents)
         : storedEvents
     )
-    .catch(error => ({error}))
+    .catch(error => error)
 }
 
 export default storeEventsFactory
