@@ -18,7 +18,7 @@ import {
   eventsStreamFromBackendEmitter
 } from './utils'
 
-describe.only('Utilities', () => {
+describe('Utilities', () => {
   describe('prefixString(prefix, str)', () => {
     it('should be a function', () => should(prefixString).be.a.Function())
     it('should be curried', () => {
@@ -82,7 +82,7 @@ describe.only('Utilities', () => {
       should(isValidString(() => {})).be.False()
     })
   })
-  describe.only('isValidHostname(str)', () => {
+  describe('isValidHostname(str)', () => {
     it('should be a function', () => should(isValidHostname).be.a.Function())
     it('should return true if `str` is a valid hostname, false otherwise', () => {
       should(isValidHostname('github')).be.True()
