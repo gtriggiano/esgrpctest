@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 import sinon from 'sinon'
-import { range, sample, random, isArray } from 'lodash'
+import { range, sample, random, isArray, pick } from 'lodash'
 import EventEmitter from 'eventemitter3'
 
 import { eventsStreamFromBus } from '../src/utils'
@@ -35,19 +35,35 @@ function InMemorySimulation (data) {
 function FixtureBackend ({aggregates, events, snapshots, store}) {
   function dispatchEvents (results, events) {
     events.forEach((evt, idx) => process.nextTick(() => {
-      results.emit('event', evt.toJS())
+      let e = evt.toJS()
+      let evtt = {
+        aggregateIdentity: {
+          id: e.aggregateId,
+          type: e.aggregateType
+        },
+        ...pick(e, ['type', 'sequenceNumber', 'data', 'metadata', 'id', 'storedOn'])
+      }
+      results.emit('event', evtt)
     }))
     setTimeout(function () {
       results.emit('end')
     }, events.size)
   }
   function dispatchSnapshot (results, snapshot) {
-    process.nextTick(() => {
-      results.emit('snapshot', snapshot.toJS())
-    })
-    setTimeout(function () {
-      results.emit('end')
-    }, 5)
+    if (snapshot) {
+      process.nextTick(() => {
+        let s = snapshot.toJS()
+        let st = {
+          aggregateIdentity: {
+            id: s.aggregateId,
+            type: s.aggregateType
+          },
+          ...pick(s, ['version', 'data'])
+        }
+        results.emit('snapshot', st)
+      })
+    }
+    process.nextTick(() => results.emit('end'))
   }
 
   return {
