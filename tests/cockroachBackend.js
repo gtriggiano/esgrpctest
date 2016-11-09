@@ -1,5 +1,6 @@
 import pg from 'pg'
-import { random, pick, uniq, min } from 'lodash'
+import { random, pick, uniq, min, isInteger } from 'lodash'
+import shortid from 'shortid'
 import should from 'should/as-function'
 import sinon from 'sinon'
 import Immutable from 'immutable'
@@ -22,21 +23,23 @@ let cockroachCoordinates = {
 }
 let backend = CockroachBackend(cockroachCoordinates)
 
-describe('CockroachBackend(settings)', () => {
+describe.only('CockroachBackend([settings])', () => {
   it(`is a function`, () => should(CockroachBackend).be.a.Function())
-  it('throws if settings.host is not a valid string', () => {
-    function throwing () {
-      CockroachBackend({
-        host: ''
-      })
+  it('passing `settings` is optional', () => {
+    function notThrowing () {
+      CockroachBackend()
     }
-    function throwing2 () {
-      CockroachBackend({
-        host: 2
-      })
-    }
-    should(throwing).throw()
-    should(throwing2).throw()
+    should(notThrowing).not.throw()
+  })
+  it('throws if settings.host is neither a valid hostname or an IPv4 address', () => {
+    should(() => CockroachBackend({host: ''})).throw()
+    should(() => CockroachBackend({host: '@host'})).throw()
+    should(() => CockroachBackend({host: '@host..com'})).throw()
+    should(() => CockroachBackend({host: {}})).throw()
+
+    should(() => CockroachBackend({host: 'hostname'})).not.throw()
+    should(() => CockroachBackend({host: 'hostname.com'})).not.throw()
+    should(() => CockroachBackend({host: '127.0.0.1'})).not.throw()
   })
   it('throws if settings.port is not a positive integer', () => {
     function throwing () {
@@ -80,28 +83,76 @@ describe('CockroachBackend(settings)', () => {
     should(throwing).throw()
     should(throwing2).throw()
   })
+  it('throws if settings.max is not a positive integer', () => {
+    function throwing () {
+      CockroachBackend({
+        max: ''
+      })
+    }
+    function throwing2 () {
+      CockroachBackend({
+        max: -2
+      })
+    }
+    should(throwing).throw()
+    should(throwing2).throw()
+  })
+  it('throws if settings.idleTimeoutMillis is not a positive integer', () => {
+    function throwing () {
+      CockroachBackend({
+        idleTimeoutMillis: ''
+      })
+    }
+    function throwing2 () {
+      CockroachBackend({
+        idleTimeoutMillis: -2
+      })
+    }
+    should(throwing).throw()
+    should(throwing2).throw()
+  })
+  describe('Default settings', () => {
+    it('host === `localhost`', () => {
+      should(CockroachBackend().settings.host).equal('localhost')
+    })
+    it('port === 26257', () => {
+      should(CockroachBackend().settings.port).equal(26257)
+    })
+    it('database === `eventstore`', () => {
+      should(CockroachBackend().settings.database).equal('eventstore')
+    })
+    it('user === `root`', () => {
+      should(CockroachBackend().settings.user).equal('root')
+    })
+    it('max === 10', () => {
+      should(CockroachBackend().settings.max).equal(10)
+    })
+    it('idleTimeoutMillis === 30000', () => {
+      should(CockroachBackend().settings.idleTimeoutMillis).equal(30000)
+    })
+  })
 })
 
 describe('Cockroach Backend instance', () => {
-  it('should have method .setup()', () => {
+  it('has method .setup()', () => {
     should(backend.setup).be.a.Function()
   })
-  it('should have method .getEvents()', () => {
+  it('has method .getEvents()', () => {
     should(backend.getEvents).be.a.Function()
   })
-  it('should have method .getEventsByAggregate()', () => {
+  it('has method .getEventsByAggregate()', () => {
     should(backend.getEventsByAggregate).be.a.Function()
   })
-  it('should have method .getEventsByAggregateTypes()', () => {
+  it('has method .getEventsByAggregateTypes()', () => {
     should(backend.getEventsByAggregateTypes).be.a.Function()
   })
-  it('should have method .getEventsByTypes()', () => {
+  it('has method .getEventsByTypes()', () => {
     should(backend.getEventsByTypes).be.a.Function()
   })
-  it('should have method .getLastSnapshotOfAggregate()', () => {
+  it('has method .getLastSnapshotOfAggregate()', () => {
     should(backend.getLastSnapshotOfAggregate).be.a.Function()
   })
-  it('should have method .storeEvents()', () => {
+  it('has method .storeEvents()', () => {
     should(backend.storeEvents).be.a.Function()
   })
 })
@@ -109,7 +160,7 @@ describe('Cockroach Backend instance', () => {
 describe('backend.setup(callback(err))', () => {
   before(() => flushDB())
 
-  it('should ensure the aggregates, events and snapshots tables and call callback', (done) => {
+  it('ensures the aggregates, events and snapshots tables and call callback', (done) => {
     backend.setup((err) => {
       if (err) return done(err)
       getClient().then(client => {
@@ -133,11 +184,11 @@ describe('backend.setup(callback(err))', () => {
 describe('backend.getEvents({fromEventId[, limit]})', () => {
   before(() => populateDB())
 
-  it('should return an Event Emitter', () => {
+  it('returns an Event Emitter', () => {
     let results = backend.getEvents({fromEventId: 0, limit: 1})
     should(results).be.an.instanceof(EventEmitter)
   })
-  it('returned EE should emit `event` for each event fetched', (done) => {
+  it('returned EE emits `event` for each event fetched', (done) => {
     let storedEvents = testData.events.slice(-10)
     let results = backend.getEvents({
       fromEventId: storedEvents.get(0).get('id') - 1
@@ -150,7 +201,7 @@ describe('backend.getEvents({fromEventId[, limit]})', () => {
       done()
     })
   })
-  it('returned EE should emit `end` event when all fetched events have been emitted', (done) => {
+  it('returned EE emits `end` event when all fetched events have been emitted', (done) => {
     let storedEvents = testData.events.slice(-10)
     let results = backend.getEvents({
       fromEventId: storedEvents.get(0).get('id') - 1
@@ -164,7 +215,7 @@ describe('backend.getEvents({fromEventId[, limit]})', () => {
       done()
     })
   })
-  it('returned EE should emit just `end` if no events are found', (done) => {
+  it('returned EE emits just `end` if no events are found', (done) => {
     let results = backend.getEvents({
       fromEventId: 1000000
     })
@@ -176,7 +227,7 @@ describe('backend.getEvents({fromEventId[, limit]})', () => {
       done()
     })
   })
-  it('returned EE should emit the events ordered by `id`', function (done) {
+  it('returned EE emits the events ordered by `id`', function (done) {
     this.timeout(4000)
     let results = backend.getEvents({
       fromEventId: 0
@@ -190,7 +241,7 @@ describe('backend.getEvents({fromEventId[, limit]})', () => {
       done()
     })
   })
-  it('fetching should get all events with `id` > `fromEventId`', function (done) {
+  it('fetching gets all events with `id` > `fromEventId`', function (done) {
     this.timeout(4000)
     let storedEvents = testData.events.slice(random(-5, -testData.events.size))
     let results = backend.getEvents({
@@ -205,7 +256,7 @@ describe('backend.getEvents({fromEventId[, limit]})', () => {
       done()
     })
   })
-  it('fetching should take in to account `limit` param if provided', (done) => {
+  it('fetching takes in to account `limit` param if provided', (done) => {
     let lastEvtsN = random(-100, -50)
     let storedEvents = testData.events.slice(lastEvtsN)
     let limit = random(1, storedEvents.size * 2)
@@ -232,14 +283,14 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
   )
   let testAggregateIdentity = pick(testAggregate.toJS(), ['id', 'type'])
 
-  it('should return an Event Emitter', () => {
+  it('returns an Event Emitter', () => {
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
       fromVersion: 0
     })
     should(results).be.an.instanceof(EventEmitter)
   })
-  it('returned EE should emit `event` for each event fetched', (done) => {
+  it('returned EE emits `event` for each event fetched', (done) => {
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
       fromVersion: 0
@@ -252,7 +303,7 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
       done()
     })
   })
-  it('returned EE should emit `end` event when all fetched events have been emitted', (done) => {
+  it('returned EE emits `end` event when all fetched events have been emitted', (done) => {
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
       fromVersion: 0
@@ -266,7 +317,7 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
       done()
     })
   })
-  it('returned EE should emit just `end` if no events are found', (done) => {
+  it('returned EE emits just `end` if no events are found', (done) => {
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
       fromVersion: 1000
@@ -279,7 +330,7 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
       done()
     })
   })
-  it('returned EE should emit the events ordered by `id`', (done) => {
+  it('returned EE emits the events ordered by `id`', (done) => {
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
       fromVersion: 0
@@ -292,7 +343,7 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
       done()
     })
   })
-  it('fetching should get all events with `sequenceNumber` > `fromVersion`', (done) => {
+  it('fetching gets all events with `sequenceNumber` > `fromVersion`', (done) => {
     let storedEvents = testAggregateEvents.filter(e => e.get('sequenceNumber') > 2)
     let results = backend.getEventsByAggregate({
       aggregateIdentity: testAggregateIdentity,
@@ -307,7 +358,7 @@ describe('backend.getEventsByAggregate({aggregateIdentity, fromVersion[, limit]}
       done()
     })
   })
-  it('fetching should take in to account `limit` param if provided', (done) => {
+  it('fetching takes in to account `limit` param if provided', (done) => {
     let storedEvents = testAggregateEvents.filter(e => e.get('sequenceNumber') > 2)
     let limit = random(1, storedEvents.size * 2)
     let results = backend.getEventsByAggregate({
@@ -332,7 +383,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
   let testAggregatesTypes = uniq(testAggregates.map(a => a.get('type')).toJS())
   let testEvents = testData.events.filter(e => !!~testAggregatesTypes.indexOf(e.get('aggregateType')))
 
-  it('should return an Event Emitter', () => {
+  it('returns an Event Emitter', () => {
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
       fromEventId: 0,
@@ -340,7 +391,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
     })
     should(results).be.an.instanceof(EventEmitter)
   })
-  it('returned EE should emit `event` for each event fetched', (done) => {
+  it('returned EE emits `event` for each event fetched', (done) => {
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
       fromEventId: 0
@@ -353,7 +404,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
       done()
     })
   })
-  it('returned EE should emit `end` event when all fetched events have been emitted', (done) => {
+  it('returned EE emits `end` event when all fetched events have been emitted', (done) => {
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
       fromEventId: 0
@@ -367,7 +418,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
       done()
     })
   })
-  it('returned EE should emit just `end` if no events are found', (done) => {
+  it('returned EE emits just `end` if no events are found', (done) => {
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
       fromEventId: 1000000
@@ -380,7 +431,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
       done()
     })
   })
-  it('returned EE should emit the events ordered by `id`', (done) => {
+  it('returned EE emits the events ordered by `id`', (done) => {
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
       fromEventId: 0
@@ -393,7 +444,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
       done()
     })
   })
-  it('fetching should get all events with `id` > `fromEventId`', (done) => {
+  it('fetching gets all events with `id` > `fromEventId`', (done) => {
     let storedEvents = testEvents.slice(random(-5, -testEvents.size))
     let results = backend.getEventsByAggregateTypes({
       aggregateTypes: testAggregatesTypes,
@@ -408,7 +459,7 @@ describe('backend.getEventsByAggregateTypes({aggregateTypes, fromEventId[, limit
       done()
     })
   })
-  it('fetching should take in to account `limit` param if provided', (done) => {
+  it('fetching takes in to account `limit` param if provided', (done) => {
     let storedEvents = testEvents.slice(random(-5, -testEvents.size))
     let limit = random(1, storedEvents.size * 2)
     let results = backend.getEventsByAggregateTypes({
@@ -430,7 +481,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
   let testEventTypes = uniq(testData.events.slice(0, 4).map(e => e.get('type')).toJS())
   let testEvents = testData.events.filter(e => !!~testEventTypes.indexOf(e.get('type')))
 
-  it('should return an Event Emitter', () => {
+  it('returns an Event Emitter', () => {
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
       fromEventId: 0,
@@ -438,7 +489,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
     })
     should(results).be.an.instanceof(EventEmitter)
   })
-  it('returned EE should emit `event` for each event fetched', (done) => {
+  it('returned EE emits `event` for each event fetched', (done) => {
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
       fromEventId: 0
@@ -451,7 +502,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
       done()
     })
   })
-  it('returned EE should emit `end` event when all fetched events have been emitted', (done) => {
+  it('returned EE emits `end` event when all fetched events have been emitted', (done) => {
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
       fromEventId: 0
@@ -465,7 +516,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
       done()
     })
   })
-  it('returned EE should emit just `end` if no events are found', (done) => {
+  it('returned EE emits just `end` if no events are found', (done) => {
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
       fromEventId: 1000000
@@ -478,7 +529,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
       done()
     })
   })
-  it('returned EE should emit the events ordered by `id`', (done) => {
+  it('returned EE emits the events ordered by `id`', (done) => {
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
       fromEventId: 0
@@ -491,7 +542,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
       done()
     })
   })
-  it('fetching should get all events with `id` > `fromEventId`', (done) => {
+  it('fetching gets all events with `id` > `fromEventId`', (done) => {
     let storedEvents = testEvents.slice(random(-5, -testEvents.size))
     let results = backend.getEventsByTypes({
       eventTypes: testEventTypes,
@@ -506,7 +557,7 @@ describe('backend.getEventsByTypes({eventTypes, fromEventId, limit})', () => {
       done()
     })
   })
-  it('fetching should take in to account `limit` param if provided', (done) => {
+  it('fetching takes in to account `limit` param if provided', (done) => {
     let storedEvents = testEvents.slice(random(-5, -testEvents.size))
     let limit = random(1, storedEvents.size * 2)
     let results = backend.getEventsByTypes({
@@ -551,11 +602,11 @@ describe('backend.getLastSnapshotOfAggregate({aggregateIdentity})', () => {
     data: storedAggregateSnapshot.get('data')
   }
 
-  it('should return an Event Emitter', () => {
+  it('returns an Event Emitter', () => {
     let results = backend.getLastSnapshotOfAggregate({aggregateIdentity: testAggregateIdentity})
     should(results).be.an.instanceof(EventEmitter)
   })
-  it('returned EE should emit `snapshot` if a snapshot is found, then `end`', (done) => {
+  it('returned EE emits `snapshot` if a snapshot is found, then `end`', (done) => {
     let results = backend.getLastSnapshotOfAggregate({aggregateIdentity: testAggregateIdentity})
     let spy = sinon.spy()
     results.on('snapshot', spy)
@@ -565,7 +616,7 @@ describe('backend.getLastSnapshotOfAggregate({aggregateIdentity})', () => {
       done()
     })
   })
-  it('returned EE should emit just `end` if a snapshot is not found', (done) => {
+  it('returned EE emits just `end` if a snapshot is not found', (done) => {
     let results = backend.getLastSnapshotOfAggregate({aggregateIdentity: {
       id: 'notexists',
       type: 'notexists'
@@ -578,7 +629,7 @@ describe('backend.getLastSnapshotOfAggregate({aggregateIdentity})', () => {
       done()
     })
   })
-  it('returned EE should emit just the last snapshot of an aggregate', (done) => {
+  it('returned EE emits just the last snapshot of an aggregate', (done) => {
     let results = backend.getLastSnapshotOfAggregate({aggregateIdentity: testAggregateIdentity})
     let spy = sinon.spy()
     results.on('snapshot', spy)
@@ -589,6 +640,72 @@ describe('backend.getLastSnapshotOfAggregate({aggregateIdentity})', () => {
       done()
     })
   })
+})
+describe('backend.storeEvents({writeRequests, transactionId})', () => {
+  let aggregatesRandomized = testData.aggregates.sortBy(() => Math.random())
+  let aggregate1 = aggregatesRandomized.get(0)
+  let aggregate2 = aggregatesRandomized.get(1)
+  let aggregate1Identity = pick(aggregate1.toJS(), ['id', 'type'])
+  let aggregate2Identity = pick(aggregate2.toJS(), ['id', 'type'])
+
+  beforeEach(function () {
+    this.timeout(0)
+    return flushDB()
+      .then(() => new Promise((resolve, reject) => {
+        backend.setup(() => resolve())
+      }))
+      .then(() => populateDB())
+  })
+
+  it('returns an Event Emitter', () => {
+    let ee = backend.storeEvents({
+      writeRequests: [{
+        aggregateIdentity: aggregate1Identity,
+        events: [{type: 'test', data: '', metadata: ''}],
+        expectedAggregateVersion: aggregate1.get('version')
+      }],
+      transactionId: shortid()
+    })
+    should(ee).be.an.instanceof(EventEmitter)
+  })
+  it('returned EE emits `storedEvents` with a list of created events', function (done) {
+    let ee = backend.storeEvents({
+      writeRequests: [{
+        aggregateIdentity: aggregate1Identity,
+        events: [
+          {type: 'TypeOne', data: 'data of first event', metadata: 'metadata of first event'},
+          {type: 'TypeTwo', data: 'data of second event', metadata: 'metadata of second event'}
+        ],
+        expectedAggregateVersion: aggregate1.get('version')
+      }],
+      transactionId: shortid()
+    })
+    ee.on('storedEvents', (events) => {
+      should(events.length).equal(2)
+
+      should(isInteger(events[0].id)).be.True()
+      should(events[0].type).equal('TypeOne')
+      should(events[0].aggregateIdentity).deepEqual(aggregate1Identity)
+      should(events[0].sequenceNumber).equal(aggregate1.get('version') + 1)
+      should(events[0].data).equal('data of first event')
+      should(events[0].metadata).equal('metadata of first event')
+
+      should(isInteger(events[1].id)).be.True()
+      should(events[1].type).equal('TypeTwo')
+      should(events[1].aggregateIdentity).deepEqual(aggregate1Identity)
+      should(events[1].sequenceNumber).equal(aggregate1.get('version') + 2)
+      should(events[1].data).equal('data of second event')
+      should(events[1].metadata).equal('metadata of second event')
+      done()
+    })
+  })
+  it('creates new aggregates if writing to not existent aggregate\'streams without version control enabled')
+  it('creates new aggregates if writing to not existent aggregate\'streams with expectedAggregateVersion === 0')
+  it('DOES NOT create new aggregates if writing to not existent aggregate\'streams with expectedAggregateVersion > 0')
+  it('returned EE should emit `error` if there is a version mismatch')
+  it('can save events for multiple aggregate streams whithin the same transaction')
+  it('fails if the writing to one aggregate stream fails')
+  it('writes to aggregate\'streams within serialized transactions')
 })
 
 function getClient () {
@@ -607,7 +724,7 @@ function flushDB () {
         CREATE DATABASE IF NOT EXISTS eventstore;
         DROP TABLE IF EXISTS eventstore.snapshots;
         DROP TABLE IF EXISTS eventstore.events;
-        DROP TABLE IF EXISTS eventstore.aggregates`,
+        DROP TABLE IF EXISTS eventstore.aggregates;`,
         (err) => {
           client.end()
           if (err) return reject(err)
