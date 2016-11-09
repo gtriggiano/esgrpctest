@@ -82,12 +82,15 @@ describe.only('Utilities', () => {
       should(isValidString(() => {})).be.False()
     })
   })
-  describe('isValidHostname(str)', () => {
+  describe.only('isValidHostname(str)', () => {
     it('should be a function', () => should(isValidHostname).be.a.Function())
     it('should return true if `str` is a valid hostname, false otherwise', () => {
       should(isValidHostname('github')).be.True()
       should(isValidHostname('github.com')).be.True()
       should(isValidHostname('')).be.False()
+      should(isValidHostname(2)).be.False()
+      should(isValidHostname({})).be.False()
+      should(isValidHostname(false)).be.False()
       should(isValidHostname('@github')).be.False()
       should(isValidHostname('@github..com')).be.False()
     })

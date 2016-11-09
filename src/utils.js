@@ -20,7 +20,7 @@ export let timeoutCallback = curry((timeout, msg, cb) => {
 
 export let isValidString = (str) => isString(str) && !!str.length
 
-export let isValidHostname = (str) => validHostnameRegex.test(str)
+export let isValidHostname = (str) => isString(str) && validHostnameRegex.test(str)
 
 export let isPositiveInteger = (n) => isInteger(n) && n > 0
 
