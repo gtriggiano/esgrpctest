@@ -126,7 +126,29 @@ function FixtureBackend ({aggregates, events, snapshots, store}) {
 
       return results
     },
-    storeEvents () {}
+    storeEvents ({writeRequests, transactionId}) {
+      // we use event.metadata string starting with `failure`
+      // as a trick to make the results EE emit `error`
+      let _failure
+      writeRequests.forEach(request =>
+        request.events.forEach(e => {
+          if (e.metadata.indexOf('failure') === 0) _failure = new Error(e.metadata)
+        }))
+
+      let results = new EventEmitter()
+      let storedEvents = writeRequests
+        .map(({aggregateIdentity, events}, rIdx) =>
+          events.map((e, eIdx) => ({...e, aggregateIdentity, id: `${rIdx}${eIdx}`}))
+        )
+        .reduce((storedEvents, events) => storedEvents.concat(events), [])
+
+      process.nextTick(() => {
+        if (_failure) return results.emit('error', _failure)
+        results.emit('storedEvents', storedEvents)
+      })
+
+      return results
+    }
   }
 }
 
