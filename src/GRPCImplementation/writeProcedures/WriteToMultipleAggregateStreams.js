@@ -7,17 +7,17 @@ function WriteToMultipleAggregateStream ({backend, store}) {
   return (call, callback) => {
     let { writeRequests } = call.request
 
-    if (!writeRequests.length) return call.emit('error', new Error('writingRequests should be a list of event storage requests'))
+    if (!writeRequests.length) return callback(new Error('writingRequests should be a list of event storage requests'))
 
     try {
       writeRequests = writeRequests.map(validateAndGetBackendWriteRequest)
     } catch (e) {
-      return call.emit('error', e)
+      return callback(e)
     }
 
     // Check that there is just one request for every aggregate
     let involvedAggregates = uniq(writeRequests.map(({aggregateIdentity}) => `${aggregateIdentity.type}${aggregateIdentity.uuid}`))
-    if (involvedAggregates.length < writeRequests.length) return call.emit('error', new Error('each writeRequest should concern a different aggregate'))
+    if (involvedAggregates.length < writeRequests.length) return callback(new Error('each writeRequest should concern a different aggregate'))
 
     let transactionId = shortid()
 
@@ -25,12 +25,12 @@ function WriteToMultipleAggregateStream ({backend, store}) {
 
     backendResults.on('error', err => {
       backendResults.removeAllListeners()
-      call.emit('error', err)
+      callback(err)
     })
     backendResults.on('storedEvents', storedEvents => {
       backendResults.removeAllListeners()
       store.publishEvents(storedEvents)
-      callback(null, storedEvents)
+      callback(null, {events: storedEvents})
     })
   }
 }
