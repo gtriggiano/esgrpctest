@@ -16,7 +16,7 @@
     "i:unit:tests:live": "mocha --compilers js:babel-register -b -w tests/unit.js",
     "i:cockroach:tests": "mocha --compilers js:babel-register tests/cockroachBackend.js",
     "i:cockroach:tests:live": "mocha --compilers js:babel-register -b -w tests/cockroachBackend.js",
-    "i:transpile": "babel src -d lib"
+    "i:transpile": "babel src -d -D lib"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
