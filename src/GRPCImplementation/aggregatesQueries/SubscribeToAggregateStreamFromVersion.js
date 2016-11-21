@@ -1,4 +1,5 @@
 import Rx from 'rxjs'
+import { max } from 'lodash'
 
 import { isValidString, eventsStreamFromBackendEmitter } from '../../utils'
 
@@ -12,7 +13,7 @@ function SubscribeToAggregateStreamFromVersion ({backend, store}) {
     if (!isValidString(aggregateIdentity.type)) return call.emit('error', new TypeError('aggregateIdentity.type should be a non empty string'))
 
     let { id, type } = aggregateIdentity
-    fromVersion = fromVersion >= 0 ? fromVersion : 0
+    fromVersion = max([0, fromVersion])
 
     // Call backend
     let params = {aggregateIdentity, fromVersion}

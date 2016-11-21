@@ -6,7 +6,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateStreamFromVersion(call)', () => {
-  it('call should emit `error` if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
+  it('emits `error` on call if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -39,7 +39,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call backend.getEventsByAggregate() with right parameters', () => {
+  it('invokes backend.getEventsByAggregate() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -57,7 +57,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
     should(calls[0].args[0].fromVersion).equal(max([0, simulation.call.request.fromVersion]))
     should(calls[0].args[0].limit).equal(undefined)
   })
-  it('should call.write() the right sequence of fetched and live events about aggregate', (done) => {
+  it('invokes call.write() for every fetched and live event of aggregate, in the right sequence', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
@@ -96,7 +96,7 @@ describe('.subscribeToAggregateStreamFromVersion(call)', () => {
       done()
     }, storedEvents.size + 200)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)

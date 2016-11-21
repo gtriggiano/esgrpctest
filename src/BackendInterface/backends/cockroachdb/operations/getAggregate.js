@@ -9,7 +9,13 @@ export default function getAggregate (client, aggregateIdentity) {
       [id, type],
       (err, result) => {
         if (err) return reject(err)
-        resolve(result.rows[0])
+        if (!result.rows[0]) return resolve()
+        let {id, type, version} = result.rows[0]
+        resolve({
+          id,
+          type,
+          version: parseInt(version, 10)
+        })
       }
     )
   })

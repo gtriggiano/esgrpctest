@@ -1,15 +1,16 @@
+import net from 'net'
 import { forEach } from 'lodash'
 
 import apiHandlersFactories from './api'
-import { setupConnectionsPool, getConnection } from './helpers/db'
+import setupConnectionsPool from './helpers/setupConnectionsPool'
 import setupDatabase from './operations/setup'
-import { prefixString, isValidString, isPositiveInteger } from './../../../utils'
+import { prefixString, isValidString, isValidHostname, isPositiveInteger } from './../../../utils'
 
 function CockroachDBBackend (_settings) {
   let settings = {...defaultSettings, ..._settings}
   _validateSettings(settings)
 
-  setupConnectionsPool(settings)
+  let getConnection = setupConnectionsPool(settings)
 
   let backend = {}
 
@@ -25,6 +26,7 @@ function CockroachDBBackend (_settings) {
   }
 
   Object.defineProperty(backend, 'setup', {value: setup})
+  Object.defineProperty(backend, 'settings', {get: () => ({...settings})})
   forEach(apiHandlersFactories, (factory, handlerName) => {
     Object.defineProperty(backend, handlerName, {value: factory(getConnection)})
   })
@@ -46,13 +48,17 @@ function _validateSettings (settings) {
     host,
     port,
     database,
-    user
+    user,
+    max,
+    idleTimeoutMillis
   } = settings
 
-  if (!isValidString(host)) throw new TypeError(iMsg('settings.host should be a valid string'))
+  if (!isValidHostname(host) && !net.isIPv4(host)) throw new TypeError(iMsg('settings.host should be a valid hostname or IPv4 address'))
   if (!isPositiveInteger(port)) throw new TypeError(iMsg('settings.port should be a positive integer'))
   if (!isValidString(database)) throw new TypeError(iMsg('settings.database should be a valid string'))
   if (!isValidString(user)) throw new TypeError(iMsg('settings.user should be a valid string'))
+  if (!isPositiveInteger(max)) throw new TypeError(iMsg('settings.max should be a positive integer'))
+  if (!isPositiveInteger(idleTimeoutMillis)) throw new TypeError(iMsg('settings.idleTimeoutMillis should be a positive integer'))
 }
 
 export default CockroachDBBackend

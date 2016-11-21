@@ -5,14 +5,17 @@
   "main": "lib/index.js",
   "scripts": {
     "unit:tests:live": "npm run clean && docker-compose run development npm run i:unit:tests:live",
+    "cockroach:tests:live": "npm run clean && docker-compose up -d cockroach && sleep 4 && docker-compose run development npm run i:cockroach:tests:live",
     "prepublish": "./internals/prepublish.sh",
     "test": "./internals/runTestSuite.sh",
     "release": "./internals/release.sh",
     "stop": "docker-compose stop",
     "rm": "docker-compose rm -f",
     "clean": "npm run stop && npm run rm",
-    "i:unit:tests": "SERVICEHOST=eventstore mocha --compilers js:babel-register tests/unit.js",
-    "i:unit:tests:live": "SERVICEHOST=eventstore mocha --compilers js:babel-register -b -w tests/unit.js",
+    "i:unit:tests": "mocha --compilers js:babel-register tests/unit.js",
+    "i:unit:tests:live": "mocha --compilers js:babel-register -b -w tests/unit.js",
+    "i:cockroach:tests": "mocha --compilers js:babel-register tests/cockroachBackend.js",
+    "i:cockroach:tests:live": "mocha --compilers js:babel-register -b -w tests/cockroachBackend.js",
     "i:transpile": "babel src -d lib"
   },
   "dependencies": {
@@ -43,7 +46,12 @@
     "globals": [
       "describe",
       "it",
-      "data"
+      "before",
+      "beforeEach",
+      "after",
+      "afterEach",
+      "data",
+      "testData"
     ]
   },
   "repository": {

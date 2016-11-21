@@ -1,9 +1,11 @@
 import { isString, isInteger, range, curry } from 'lodash'
 import Rx from 'rxjs'
 
-const prefixString = curry((prefix, str) => `${prefix}${str}`)
+let validHostnameRegex = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/
 
-const timeoutCallback = curry((timeout, msg, cb) => {
+export let prefixString = curry((prefix, str) => `${prefix}${str}`)
+
+export let timeoutCallback = curry((timeout, msg, cb) => {
   let _called = false
   let _invoke = (...args) => {
     if (_called) return
@@ -16,11 +18,13 @@ const timeoutCallback = curry((timeout, msg, cb) => {
   return _invoke
 })
 
-const isValidString = (str) => isString(str) && !!str.length
+export let isValidString = (str) => isString(str) && !!str.length
 
-const isPositiveInteger = (n) => isInteger(n) && n > 0
+export let isValidHostname = (str) => isString(str) && validHostnameRegex.test(str)
 
-const zeropad = (i, minLength) => {
+export let isPositiveInteger = (n) => isInteger(n) && n > 0
+
+export let zeropad = (i, minLength) => {
   let str = String(i)
   let diff = minLength - str.length
   if (diff > 0) {
@@ -29,7 +33,7 @@ const zeropad = (i, minLength) => {
   return str
 }
 
-const eventsStreamFromBus = (bus, delayTime = 100) => {
+export let eventsStreamFromBus = (bus, delayTime = 100) => {
   let receivedEvents = {
     ids: [],
     byId: {}
@@ -60,20 +64,10 @@ const eventsStreamFromBus = (bus, delayTime = 100) => {
   return stream
 }
 
-const eventsStreamFromBackendEmitter = (e) => {
+export let eventsStreamFromBackendEmitter = (e) => {
   let evt = Rx.Observable.fromEvent(e, 'event')
   let error = Rx.Observable.fromEvent(e, 'error').flatMap(err => Rx.Observable.throw(err))
   let end = Rx.Observable.fromEvent(e, 'end')
 
   return evt.merge(error).takeUntil(end)
-}
-
-export {
-  prefixString,
-  timeoutCallback,
-  isValidString,
-  isPositiveInteger,
-  zeropad,
-  eventsStreamFromBus,
-  eventsStreamFromBackendEmitter
 }

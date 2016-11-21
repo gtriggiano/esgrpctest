@@ -1,5 +1,5 @@
 import shortid from 'shortid'
-import { every, min } from 'lodash'
+import { every, max } from 'lodash'
 
 import { isValidString, prefixString } from '../../utils'
 
@@ -9,7 +9,7 @@ function WriteToAggregateStream ({backend, store}) {
     try {
       writeRequests = [validateAndGetBackendWriteRequest(call.request)]
     } catch (e) {
-      return call.emit('error', e)
+      return callback(e)
     }
 
     let transactionId = shortid()
@@ -18,12 +18,12 @@ function WriteToAggregateStream ({backend, store}) {
 
     backendResults.on('error', err => {
       backendResults.removeAllListeners()
-      call.emit('error', err)
+      callback(err)
     })
     backendResults.on('storedEvents', storedEvents => {
       backendResults.removeAllListeners()
       store.publishEvents(storedEvents)
-      callback(null, storedEvents)
+      callback(null, {events: storedEvents})
     })
   }
 }
@@ -35,16 +35,20 @@ function validateAndGetBackendWriteRequest (request, requestIndex) {
 
   // Validate request
   if (!aggregateIdentity) throw new TypeError(eMgs('aggregateIdentity cannot be undefined'))
-  if (!isValidString(aggregateIdentity.uuid)) throw new TypeError(eMgs('aggregateIdentity.uuid should be a non empty string'))
-  if (!isValidString(aggregateIdentity.type)) throw new TypeError(eMgs('aggregateIdentity.type should be a non empty string'))
-  if (!events.length) throw new Error(eMgs('events should be a list of events to store'))
-  if (!every(events, ({type}) => isValidString(type))) throw new TypeError(eMgs('events should have a valid type'))
+  if (!isValidString(aggregateIdentity.id)) throw new TypeError(eMgs('aggregateIdentity.id should be a nonempty string'))
+  if (!isValidString(aggregateIdentity.type)) throw new TypeError(eMgs('aggregateIdentity.type should be a nonempty string'))
+  if (!events || !events.length) throw new Error(eMgs('events should be a nonempty list of events to store'))
+  if (!every(events, ({type}) => isValidString(type))) throw new TypeError(eMgs('all events should have a valid type'))
 
-  expectedAggregateVersion = min([-1, expectedAggregateVersion])
+  expectedAggregateVersion = max([-1, expectedAggregateVersion])
 
   let params = {
     aggregateIdentity,
-    events,
+    events: events.map(e => ({
+      type: e.type,
+      data: e.data || '',
+      metadata: e.metadata || ''
+    })),
     expectedAggregateVersion
   }
   if (snapshot) params.snapshot = snapshot

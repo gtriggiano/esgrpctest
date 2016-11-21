@@ -5,7 +5,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.subscribeToStoreStream(call)', () => {
-  it('should call.write() every live event', (done) => {
+  it('invokes call.write() for every live event', (done) => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -25,7 +25,7 @@ describe('.subscribeToStoreStream(call)', () => {
       done()
     }, 150)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 

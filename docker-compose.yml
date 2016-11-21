@@ -13,7 +13,7 @@ services:
       - ./package.json:/package/package.json
 
   cockroach:
-    image: cockroachdb/cockroach:beta-20160929
+    image: cockroachdb/cockroach:beta-20161103
     ports:
       - "8080:8080"
       - "26257:26257"

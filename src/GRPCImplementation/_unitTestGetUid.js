@@ -6,7 +6,7 @@ import InMemorySimulation from '../../tests/InMemorySimulation'
 import GRPCImplementation from '.'
 
 describe('.getUid(_, callback)', () => {
-  it('should call callback(null, {uid})', () => {
+  it('calls callback(null, {uid})', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
     implementation.getUid(simulation.call, simulation.callback)

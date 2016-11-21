@@ -6,7 +6,7 @@ import InMemorySimulation, { EVENT_TYPES } from '../../../tests/InMemorySimulati
 import GRPCImplementation from '..'
 
 describe('.subscribeToEventTypesStream(call)', () => {
-  it('call should emit `error` if call.request.eventTypes is not a valid list of strings', () => {
+  it('emits `error` on call if call.request.eventTypes is not a valid list of strings', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -35,7 +35,7 @@ describe('.subscribeToEventTypesStream(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call.write() every live event with type within the given types', (done) => {
+  it('invokes call.write() for every live event with type within the given types', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)
 
     let simulation = InMemorySimulation(data)
@@ -59,7 +59,7 @@ describe('.subscribeToEventTypesStream(call)', () => {
       done()
     }, 150)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)
 
     let simulation = InMemorySimulation(data)

@@ -6,7 +6,7 @@ import InMemorySimulation, { AGGREGATE_TYPES } from '../../../tests/InMemorySimu
 import GRPCImplementation from '..'
 
 describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
-  it('call should emit `error` if call.request.aggregateTypes is not a valid list of strings', () => {
+  it('emits `error` on call if call.request.aggregateTypes is not a valid list of strings', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -35,7 +35,7 @@ describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call backend.getEventsByAggregateTypes() with right parameters', () => {
+  it('invokes backend.getEventsByAggregateTypes() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -53,7 +53,7 @@ describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
     should(calls[0].args[0].fromEventId).equal(max([0, simulation.call.request.fromEventId]))
     should(calls[0].args[0].limit).equal(undefined)
   })
-  it('should call.write() the right sequence of fetched and live events about aggregate of given types', (done) => {
+  it('invokes call.write() for every fetched and live event about aggregate of given types, in the right sequence', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
     let storedEvents = data.events.filter(evt =>
       !!~testAggregateTypes.indexOf(evt.get('aggregateType'))
@@ -84,7 +84,7 @@ describe('.subscribeToAggregateTypesStreamFromEvent(call)', () => {
       done()
     }, storedEvents.size + 150)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testAggregateTypes = sampleSize(AGGREGATE_TYPES.toJS(), 2)
     let storedEvents = data.events.filter(evt =>
       !!~testAggregateTypes.indexOf(evt.get('aggregateType'))

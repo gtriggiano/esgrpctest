@@ -7,14 +7,14 @@ import backends from './BackendInterface/backends'
 const availableBackends = Object.keys(backends)
 
 describe('BackendInterface(settings)', function () {
-  it('should be a function', () => { should(BackendInterface).be.a.Function() })
-  it('should return `settings.backend` if `settings` is an instance of CustomBackendWrapper', () => {
+  it('is a function', () => { should(BackendInterface).be.a.Function() })
+  it('returns `settings.backend` if `settings` is an instance of CustomBackendWrapper', () => {
     let s = {}
     let settings = new CustomBackendWrapper(s)
     let out = BackendInterface(settings)
     should(out === settings.backend).be.True()
   })
-  it('should throw if `settings.type` is not a string with length > 0', () => {
+  it('throws if `settings.type` is not a string with length > 0', () => {
     function throwing () {
       BackendInterface({type: ''})
     }
@@ -24,13 +24,13 @@ describe('BackendInterface(settings)', function () {
     should(throwing).throw()
     should(throwing1).throw()
   })
-  it(`should throw if \`settings.type\` is not one of [${availableBackends.join(', ')}]`, () => {
+  it(`throws if \`settings.type\` is not one of [${availableBackends.join(', ')}]`, () => {
     function throwing () {
       BackendInterface({type: 'xxxxxxxx'})
     }
     should(throwing).throw()
   })
-  it('should call the appropriate backend factory and return its output', () => {
+  it('calls the appropriate backend factory and return its output', () => {
     let spies = availableBackends.reduce((spies, type) => {
       let spy = sinon.spy(backends, type)
       spies[type] = spy
@@ -43,7 +43,7 @@ describe('BackendInterface(settings)', function () {
     each(spies, spy => spy.restore())
   })
   describe('.customBackend(backendInstance)', () => {
-    it('should return an instance of CustomBackendWrapper with `backendInstance` as .backend property', () => {
+    it('returns an instance of CustomBackendWrapper with `backendInstance` as .backend property', () => {
       let backendInstance = {}
       let out = BackendInterface.customBackend(backendInstance)
       should(out instanceof CustomBackendWrapper).be.True()

@@ -6,7 +6,7 @@ import InMemorySimulation from '../../../tests/InMemorySimulation'
 import GRPCImplementation from '..'
 
 describe('.readAggregateStreamForwardFromVersion(call)', () => {
-  it('call should emit `error` if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
+  it('emits `error` on call if call.request.aggregateIdentity is not a valid aggregateIdentity', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -47,7 +47,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call backend.getEventsByAggregate() with right parameters', () => {
+  it('invokes backend.getEventsByAggregate() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -67,7 +67,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       simulation.call.request.limit < 1 ? undefined : simulation.call.request.limit
     )
   })
-  it('should call.write() the right sequence of fetched events about aggregate', (done) => {
+  it('invokes call.write() for every fetched aggregate event, in the right sequence', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let storedEvents = data.events.filter(evt =>
       evt.get('aggregateId') === testAggregate.get('id') &&
@@ -98,7 +98,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('call should .end() after all the stored events are written', (done) => {
+  it('invoks call.end() after all the stored events are written', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
@@ -124,7 +124,7 @@ describe('.readAggregateStreamForwardFromVersion(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testAggregate = data.aggregates.get(random(data.aggregates.size - 1))
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>

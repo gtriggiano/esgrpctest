@@ -11,6 +11,7 @@ import {
   prefixString,
   timeoutCallback,
   isValidString,
+  isValidHostname,
   isPositiveInteger,
   zeropad,
   eventsStreamFromBus,
@@ -19,25 +20,25 @@ import {
 
 describe('Utilities', () => {
   describe('prefixString(prefix, str)', () => {
-    it('should be a function', () => should(prefixString).be.a.Function())
-    it('should be curried', () => {
+    it('is a function', () => should(prefixString).be.a.Function())
+    it('is curried', () => {
       should(prefixString('prefix')).be.a.Function()
     })
-    it('should return `{prefix}{str}`', () => {
+    it('returns `{prefix}{str}`', () => {
       should(prefixString('Hello', ' world!')).equal('Hello world!')
     })
   })
   describe('timeoutCallback(timeout, msg, cb)', () => {
-    it('should be a function', () => should(timeoutCallback).be.a.Function())
-    it('should be curried', () => {
+    it('is a function', () => should(timeoutCallback).be.a.Function())
+    it('is curried', () => {
       should(timeoutCallback(1000)).be.a.Function()
       should(timeoutCallback(1000, 'message')).be.a.Function()
     })
-    it('should return a function', () => {
+    it('returns a function', () => {
       let timingoutCallback = timeoutCallback(1000, 'timeout!', () => {})
       should(timingoutCallback).be.a.Function()
     })
-    it('the returned function, if called within `timeout`, should invoke `cb` with the same arguments', () => {
+    it('the returned function, if called within `timeout`, invokes `cb` with the same arguments', () => {
       let cb = (one, two, three) => {
         should(one).equal(1)
         should(two).equal(2)
@@ -55,7 +56,7 @@ describe('Utilities', () => {
       }
       timeoutCallback(300, 'Timeout error...', cb)
     })
-    it('should `cb` be called only once in any case', function (done) {
+    it('`cb` is called only once in any case', function (done) {
       let cb = sinon.spy()
       let cb1 = sinon.spy()
 
@@ -71,8 +72,8 @@ describe('Utilities', () => {
     })
   })
   describe('isValidString(str)', () => {
-    it('should be a function', () => should(isValidString).be.a.Function())
-    it('should return true if `str` is a string of length > 0, false otherwise', () => {
+    it('is a function', () => should(isValidString).be.a.Function())
+    it('returns true if `str` is a string of length > 0, false otherwise', () => {
       should(isValidString('t')).be.True()
       should(isValidString('')).be.False()
       should(isValidString({})).be.False()
@@ -81,9 +82,22 @@ describe('Utilities', () => {
       should(isValidString(() => {})).be.False()
     })
   })
+  describe('isValidHostname(str)', () => {
+    it('is a function', () => should(isValidHostname).be.a.Function())
+    it('returns true if `str` is a valid hostname, false otherwise', () => {
+      should(isValidHostname('github')).be.True()
+      should(isValidHostname('github.com')).be.True()
+      should(isValidHostname('')).be.False()
+      should(isValidHostname(2)).be.False()
+      should(isValidHostname({})).be.False()
+      should(isValidHostname(false)).be.False()
+      should(isValidHostname('@github')).be.False()
+      should(isValidHostname('@github..com')).be.False()
+    })
+  })
   describe('isPositiveInteger(n)', () => {
-    it('should be a function', () => should(isPositiveInteger).be.a.Function())
-    it('should return true if `n` is a positive integer, false otherwise', () => {
+    it('is a function', () => should(isPositiveInteger).be.a.Function())
+    it('returns true if `n` is a positive integer, false otherwise', () => {
       should(isPositiveInteger(1)).be.True()
       should(isPositiveInteger(-1)).be.False()
       should(isPositiveInteger(1.3)).be.False()
@@ -94,14 +108,14 @@ describe('Utilities', () => {
     })
   })
   describe('zeropad(i, minLength)', () => {
-    it('should be a function', () => should(zeropad).be.a.Function())
-    it('should return a string', () => should(zeropad(12, 10)).be.a.String())
-    it('the returned string should have a length >= minLength', () => {
+    it('is a function', () => should(zeropad).be.a.Function())
+    it('returns a string', () => should(zeropad(12, 10)).be.a.String())
+    it('the returned string has a length >= minLength', () => {
       let i = range(random(8, 15)).join('')
       let minLength = random(5, 20)
       should(zeropad(i, minLength).length >= minLength).be.True()
     })
-    it('should pad String(i) with zeroes if String(i).length < minLength', () => {
+    it('pads String(i) with zeroes if String(i).length < minLength', () => {
       let str = zeropad('abc', 5)
       should(str).equal('00abc')
     })
@@ -115,12 +129,12 @@ describe('Utilities', () => {
       })
     }
 
-    it('should be a function', () => should(eventsStreamFromBus).be.a.Function())
-    it('should return an instance of Rx.ConnectableObservable', () => {
+    it('is a function', () => should(eventsStreamFromBus).be.a.Function())
+    it('returns an instance of Rx.ConnectableObservable', () => {
       let stream = eventsStreamFromBus(FixtureBusNode())
       should(stream).be.an.instanceof(Rx.ConnectableObservable)
     })
-    it('should delay the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `busNode`', function (done) {
+    it('delays the output stream by (more or less) `delayTime` ms in respect to the stream of events emitted by `busNode`', function (done) {
       let delayTime = random(120, 160)
       let testBusNode = FixtureBusNode()
       let testStream = eventsStreamFromBus(testBusNode, delayTime)
@@ -137,7 +151,7 @@ describe('Utilities', () => {
       let inputTime = process.hrtime()
       testBusNode.emit('StoredEvents', JSON.stringify([evt]))
     })
-    it('should ensure the right order of events emitted by `bus` within `delayTime`, ordering by event.id', function (done) {
+    it('ensures the right order of events emitted by `bus` within `delayTime`, ordering by event.id', function (done) {
       // timeOfBusEmission: [eventId, ...]
       let sourceEventsLists = {
         0: [1],
@@ -169,13 +183,13 @@ describe('Utilities', () => {
     })
   })
   describe('eventsStreamFromBackendEmitter(backendEmitter)', () => {
-    it('should be a function', () => should(eventsStreamFromBackendEmitter).be.a.Function())
-    it('should return an instance of Rx.Observable', () => {
+    it('is a function', () => should(eventsStreamFromBackendEmitter).be.a.Function())
+    it('returns an instance of Rx.Observable', () => {
       let backendEmitter = new EventEmitter()
       let stream = eventsStreamFromBackendEmitter(backendEmitter)
       should(stream).be.an.instanceof(Rx.Observable)
     })
-    it('should dispatch `event` events of `backendEmitter`', (done) => {
+    it('dispatches `event` events of `backendEmitter`', (done) => {
       let backendEmitter = new EventEmitter()
       let stream = eventsStreamFromBackendEmitter(backendEmitter)
 
@@ -201,7 +215,7 @@ describe('Utilities', () => {
         eventToEmit++
       }, 10)
     })
-    it('eventsStream should end with an error if `backendEmitter` emits an error event', (done) => {
+    it('returned eventsStream ends with an error if `backendEmitter` emits an `error` event', (done) => {
       let backendEmitter = new EventEmitter()
       let stream = eventsStreamFromBackendEmitter(backendEmitter)
       let dispatchedError = false
@@ -222,7 +236,7 @@ describe('Utilities', () => {
         done()
       }, 20)
     })
-    it('eventsStream should end if `backendEmitter` emits an end event', (done) => {
+    it('returned eventsStream ends if `backendEmitter` emits an `end` event', (done) => {
       let backendEmitter = new EventEmitter()
       let stream = eventsStreamFromBackendEmitter(backendEmitter)
 

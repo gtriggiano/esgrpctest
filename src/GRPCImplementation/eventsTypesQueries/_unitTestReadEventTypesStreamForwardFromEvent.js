@@ -6,7 +6,7 @@ import InMemorySimulation, { EVENT_TYPES } from '../../../tests/InMemorySimulati
 import GRPCImplementation from '..'
 
 describe('.readEventTypesStreamForwardFromEvent(call)', () => {
-  it('call should emit `error` if call.request.eventTypes is not a valid list of strings', () => {
+  it('emits `error` on call if call.request.eventTypes is not a valid list of strings', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -35,7 +35,7 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
     should(emitArgs[0]).equal('error')
     should(emitArgs[1]).be.an.instanceof(Error)
   })
-  it('should call backend.getEventsByTypes() with right parameters', () => {
+  it('invokes backend.getEventsByTypes() with right parameters', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
 
@@ -55,7 +55,7 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
       simulation.call.request.limit < 1 ? undefined : simulation.call.request.limit
     )
   })
-  it('should call.write() the right sequence of fetched events', (done) => {
+  it('invokes call.write() for every fetched event, in the right sequence', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
@@ -85,7 +85,7 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('call should .end() after all the stored events are written', (done) => {
+  it('invokes call.end() after all the stored events are written', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>
@@ -108,7 +108,7 @@ describe('.readEventTypesStreamForwardFromEvent(call)', () => {
       done()
     }, storedEvents.size + 10)
   })
-  it('should stop call.write()-ing if client ends subscription', (done) => {
+  it('stops invoking call.write() if client ends subscription', (done) => {
     let testEventTypes = sampleSize(EVENT_TYPES.toJS(), 2)
     let simulation = InMemorySimulation(data)
     let storedEvents = data.events.filter(evt =>

@@ -5,8 +5,8 @@ import InMemorySimulation from '../tests/InMemorySimulation'
 import GRPCImplementation from './GRPCImplementation'
 
 describe('GRPCImplementation({backend, store})', () => {
-  it('should be a function', () => should(GRPCImplementation).be.a.Function())
-  it('should return a map of functions', () => {
+  it('is a function', () => should(GRPCImplementation).be.a.Function())
+  it('returns a map of functions', () => {
     let simulation = InMemorySimulation(data)
     let implementation = GRPCImplementation(simulation)
     should(implementation).be.an.Object()
@@ -40,5 +40,10 @@ describe('GRPCImplementation({backend, store})', () => {
     require('./GRPCImplementation/storeQueries/_unitTestReadStoreStreamForwardFromEvent')
     require('./GRPCImplementation/storeQueries/_unitTestSubscribeToStoreStream')
     require('./GRPCImplementation/storeQueries/_unitTestSubscribeToStoreStreamFromEvent')
+  })
+
+  describe('Write Procedures', function () {
+    require('./GRPCImplementation/writeProcedures/_unitTestWriteToAggregateStream')
+    require('./GRPCImplementation/writeProcedures/_unitTestWriteToMultipleAggregateStreams')
   })
 })

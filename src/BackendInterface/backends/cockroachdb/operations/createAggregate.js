@@ -6,13 +6,13 @@ export default function createAggregate (client, aggregateIdentity) {
     client.query(
       `INSERT INTO aggregates (id, type, version)
       VALUES ($1, $2, $3)`,
-      [id, type, -1],
+      [id, type, 0],
       (err) => {
         if (err) return reject(err)
         resolve({
           id,
           type,
-          version: -1
+          version: 0
         })
       }
     )

@@ -40,6 +40,8 @@ export default function storeAggregateEvents (client, aggregate, events, transac
     let fetchQueryString = `
       SELECT * FROM events
       WHERE transactionId = $1
+        AND aggregateId = $2
+        AND aggregateType = $3
       ORDER BY id`
 
     // Write events
@@ -52,7 +54,7 @@ export default function storeAggregateEvents (client, aggregate, events, transac
         // Fetch and return stored events
         client.query(
           fetchQueryString,
-          [transactionId],
+          [transactionId, aggregate.id, aggregate.type],
           (err, result) => {
             if (err) return reject(err)
             resolve(result.rows.map(toDTO))
