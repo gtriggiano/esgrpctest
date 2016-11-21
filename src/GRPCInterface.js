@@ -3,7 +3,7 @@ import grpc from 'grpc'
 import EventEmitter from 'eventemitter3'
 
 const PROTOCOL_FILE_PATH = path.resolve(__dirname, '..', 'GRPCEventStore.proto')
-const EventStoreProtocol = grpc.load(PROTOCOL_FILE_PATH).grpceventstore
+export const EventStoreProtocol = grpc.load(PROTOCOL_FILE_PATH).grpceventstore
 
 import GRPCImplementation from './GRPCImplementation'
 import { prefixString, isPositiveInteger } from './utils'
