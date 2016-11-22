@@ -153,14 +153,14 @@ message BoundedEventTypesStreamRequest {
 message WriteToAggregateStreamRequest {
   AggregateIdentity aggregateIdentity = 1;
   sint32 expectedAggregateVersion = 2;
-  repeated Event events = 3 [packed=true];
+  repeated Event events = 3;
   string snapshot = 4;
 }
 
 message WriteToMultipleAggregateStreamsRequest {
-  repeated WriteToAggregateStreamRequest writeRequests = 1 [packed=true];
+  repeated WriteToAggregateStreamRequest writeRequests = 1;
 }
 
 message StoredEventsList {
-  repeated StoredEvent events = 1 [packed=true];
+  repeated StoredEvent events = 1;
 }
