@@ -16,14 +16,14 @@
     "i:unit:tests:live": "mocha --compilers js:babel-register -b -w tests/unit.js",
     "i:cockroach:tests": "mocha --compilers js:babel-register tests/cockroachBackend.js",
     "i:cockroach:tests:live": "mocha --compilers js:babel-register -b -w tests/cockroachBackend.js",
-    "i:transpile": "babel src -d -D lib"
+    "i:transpile": "babel src -D -d lib"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
     "debug": "^2.2.0",
     "dnsmq-messagebus": "0.0.3",
     "eventemitter3": "^2.0.0",
-    "grpc": "^1.0.0",
+    "grpc": "^1.0.1",
     "lodash": "^4.16.1",
     "pg": "^6.1.0",
     "rxjs": "5.0.0-beta.12",
